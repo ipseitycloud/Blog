@@ -69,14 +69,14 @@ Ahora ah ver nuestra app funcionando
 Abrimos nuestro navegador en la ruta localhost:3000 y veremos nuestra pagina
 inicial, vamos a revisar por partes el script app.js
 
-    
 <pre class="brush: js">
+```
     /**
      * Module dependencies.
      */
     
     var express = require('express');
-    
+    ```
     var app = module.exports = express.createServer();
     
     // Configuration
@@ -108,6 +108,7 @@ inicial, vamos a revisar por partes el script app.js
     
     app.listen(3000);
     console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+```
 </pre>
 
 Linea 6 cargamos el framework con require, este es el formato para cargar los
@@ -161,4 +162,7 @@ final lo q se defina en el body que es index.jade
 
 Aqui del mismo modo creamos un header 1 con lo q venga de la variable title y
 generamos un tag p con "Welcome to y lo que venga en la variable title, pueden
-ver mas ejemp
+ver mas ejemplos de jade en github o en su [pagina](http://jade-lang.com/)
+
+Post largo y apenas estamos conociendo el mundo de node, en el proximo post
+empezaremos a escribir algo de codigo
