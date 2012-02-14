@@ -1,0 +1,305 @@
+{
+    "title" : "Nodejs parte 4 – modelos",
+    "date" : "01/14/2012",
+	"author" : "Mrpix, pinguxx"
+}
+
+Para nuestra aplicacion usaremos el modulo de mongoose que ya tenemos
+instalado, el modelo es mas o menos así:
+
+![](https://cacoo.com/diagrams/gZmGOZMQQuN8K9Tl-37B71.png)
+
+Nomination es nuestro documento principal que tiene lo necesario para una
+nominación junto con su lista de usuarios, user es un documento que vamos a
+incrustar en nomination, lo pongo separado para que vean como es pero en
+realidad no es otro documento en la db, sin embargo si lo creamos como schema
+con mongoose.
+
+veamos el codigo de los modelos con mongoose
+
+    
+    
+<pre class="brush: js">    
+    function defineModels(mongoose, fn) {
+     var Schema = mongoose.Schema,
+     Nomination, User;
+    
+    /\*\*
+     \*
+     \* Model: User
+     \*
+     \*/
+     User = new Schema({
+     '_id' : String, //fb id
+     'name' : String, //user name
+     'votes' : Number //number of votes for this user
+     });
+    
+     /\*\*
+     \*
+     \* Model: Nomination
+     \*
+     \*/
+     Nomination = new Schema({
+     'name' : String,
+     'owner' : String, //who is the owner of the nomination
+     'endDate' : Date, //when this nomination is going to end
+     'users' : [User], //users added to this nomination
+     'voters' : [String], //all the dudes that vote this nomination
+     'category' : String,
+     'sub_cat' : String,
+     'active' : Boolean, //nomination finished
+     'erased' : [String] //people erased by facebook id, we wont be able to re-add them
+     });
+    
+     Nomination.virtual('id')
+     .get(function() {
+     return this._id.toHexString();
+     });
+    
+     Nomination.pre('save', function(next) {
+     //we could use this later
+     next();
+     });
+    
+     mongoose.model('Nomination', Nomination);
+    
+    fn();
+    }
+    
+    exports.defineModels = defineModels;
+</pre>    
+
+Linea 1: creamos nuestra función, donde pondremos nuestros modelos y al final
+la expondremos
+
+Linea 2 y 3: creamos nuestras variables, primero instancias schema localmente
+y luego ponemos nomination y user
+
+Linea 5-14: creamos nuestro modelo user con new Schema, pondremos un id que
+sera el id del usuario de fb, su nombre y el numero de votos que tendra el
+usuario.
+
+Linea 16-31: Creamos nuestro modelo para nominations, tendrá su nombre, su
+owner, la fecha para desactivarla, la lista de usuarios nominados, la gente
+que ah votado en esta nominación, su categoría y subcategoria, si esta activa
+o no y la lista de usuarios borrados, en este caso no pusimos el id para que
+sea generado automáticamente por mongo, no quiere decir que no este el id
+siempre esta presente en los documentos
+
+Linea 33-36: Generamos una función virtual para traer el id por si acaso lo
+necesitamos
+
+Linea 38-41: un pequeño middleware en save, antes de salvar un modelo de este
+tipo pasara por aqui, por el momento no pondré nada, next() es para llamar la
+siguiente función que en este caso seria una función de mongo que ya hace el
+guardado
+
+Linea 43: declaramos el modelo
+
+Linea 45: corremos la función que nos pasaron, regularmente es para instanciar
+el modelo para empezar a usarlo
+
+Linea 48: exportamos la función
+
+Bien ya tenemos nuestros modelos, vamos creando lo que yo llamo el
+controlador, desde ahí manejaremos las funciones que requieran funcionalidad
+de mongo así solo exponemos lo necesario, veamos como se ve nuestro
+controlador:
+
+    
+    
+<pre class="brush: js">    
+    var mongoose = require('mongoose'),
+        models = require('../models/nomination.js'),
+        Nomination, db;
+    
+    models.defineModels(mongoose, function() {
+      Nomination = mongoose.model('Nomination');
+      db = mongoose.connect('mongodb://nominator:nominat0r@ds029257.mongolab.com:29257/nomi-nation');
+    });
+    
+    var NOMINATOR = {};
+    
+    function findIndexByKeyValue(obj, key, value)
+    {
+        var l = obj.length;
+        for (var i = 0; i &lt; l; i++) {
+        	if (obj[i][key] == value) {
+    			return i;
+    		}
+    	}
+    	return null;
+    }
+    
+    /\*\*
+     \* Add vote
+     \* @nomination object
+     \* @voterId string
+     \* @userId string
+     \* @callback function
+    \*/
+    NOMINATOR.vote = function(nomination, voterId, userId, callback) {
+        //TODO: check we dont want more than 10 users per nomination
+        var isPresent = -1;
+        try {
+            isPresent = nomination.voters.indexOf(voterId);
+        }
+        catch (e){
+            isPresent = -1;
+        }
+        if (isPresent &lt; 0){
+            nomination.voters.push(voterId);
+        }
+        //TODO: change to an actual mongo function
+        var index = findIndexByKeyValue(nomination.users, &quot;_id&quot;, userId);
+        nomination.users[index].votes += 1;
+        nomination.save(callback);
+        //Nomination.update({_id :nomination.id}, {users: nomination.users}, callback);
+    };
+    
+    /\*\*
+     \* Add user
+     \* @nomination object
+     \* @user object
+     \* @callback function
+    \*/
+    NOMINATOR.addUser = function(nomination, user, callback) {
+        //TODO: check we dont want more than 10 users per nomination
+        var isPresent = nomination.erased.indexOf(user._id);
+        if (isPresent &gt;= 0){ callback(new Error('User can\'t be added'), null); return; }
+        if (user instanceof Array){
+            nomination.users = user;
+        }else{
+            nomination.users.push(user);
+        }
+        nomination.save(callback);
+        //Nomination.update({_id :nomination.id}, {users: nomination.users}, callback);
+    };
+    
+    /\*\*
+     \* Erase user
+     \* @nomination object
+     \* @user object
+     \* @callback function
+    \*/
+    NOMINATOR.eraseUser = function(nomination, user, callback) {
+        nomination.users.remove(user); //erased from the users list
+        nomination.erased.push(user._id); //add to the erased so we dont add them again
+        nomination.save(callback);
+        //Nomination.update({_id :nomination.id}, {users: nomination.users, erased: nomination.erased}, callback);
+    };
+    
+    /\*\*
+     \* Create nomination
+     \* @nomination object
+     \* @callback function
+    \*/
+    NOMINATOR.createNomination = function(nomination, callback) {
+        var myNomination = new Nomination(nomination);
+        myNomination.save(callback);
+    };
+    
+    /\*\*
+     \* Erase nomination
+     \* @nominationid string
+     \* @callback function
+    \*/
+    NOMINATOR.eraseNomination = function(nominationid, callback) {
+        Nomination.erase({'_id' : nominationid }, callback);
+    };
+    
+    /\*\*
+     \* find nominations the user own
+     \* @userid fb userid
+     \* @callback function
+     \*
+    \*/
+    NOMINATOR.findMyNominations = function(userId, callback) {
+        Nomination.where('owner', userId)
+            .where('active', true)
+            .run(callback);
+    };
+    
+    /\*\*
+     \* find nominations the user voted
+     \* @userId fb userid
+     \* @callback function
+     \*
+    \*/
+    NOMINATOR.findVoted = function(userId, callback) {
+        Nomination.where('voters').in([userId])
+            .where('active', true)
+            .run(callback);
+    };
+    
+    /\*\*
+     \* find nominates where the user was nominated
+     \* @userId fb userid
+     \* @callback function
+     \*
+    \*/
+    NOMINATOR.findNominated = function(userId, callback) {
+        Nomination.where('users._id').in([userId])
+            .where('active', true)
+            .run(callback);
+    };
+    
+    // Exporting functions
+    module.exports = NOMINATOR;
+</pre>    
+
+Linea1: cargamos mongoose
+
+2: cargamos los modelos, recuerden que exportamos solo una funcion
+
+3: nuestras variables locales
+
+5-8: usamos la funcion q exportamos en models.js e instanciamos el modelo
+nomination y nos conectamos a la base de datos
+
+10: creamos nuestro objecto q tendra toda la funcionalidad del controller para
+al final exportarlo
+
+11: una funcion que nos ayudara a buscar indexes dentro del array
+
+23-47: para agregar votos primero checamos si no esta ya presenta en la lista
+de votantes si no esta lo agregamos e incrementamos en uno el voto al usuario
+y guardamos el modelo que se ira directamente a nuestra db en mongo, agregamos
+el callback para que mande el resultado a quien nos llamo, este callback
+traera como parametros "error" y "doc"
+
+49-66: para agregar usuarios a esta nominacion primero checamos que no este en
+nuestra lista de borrados para no volverlo a meter, si esta presente
+regresamos un error, despues checamos si lo q nos estan mandado es un array si
+es asi nomas lo guardamos en nuestro array de usuarios (esto no deberia de
+pasar en produccion sin embargo lo use para las pruebas q veremos en el
+siguiente post), sino lo agregamos al array de usuarios y salvamos el modelo
+
+68-79: para remover usuarios de la lista primero lo removemos del array y
+agregamos su id a la lista de los borrados y guardamos
+
+81-89: para crear nominaciones simplemente recibimos un objeto con los
+attributos q queremos de la nominacion, lo instanciamos y guardamos
+
+91-125: busquedas, las busquedas son sencillas haciendo queries a la db,
+usamos el modelo base y vamos agregando lo q queremos buscar por ejemplo
+"where('owner', userId)" ahi lo q estamos haciendo es buscar donde el owner de
+la nominacion sea el userid que nos mandaron despues checamos que este activa
+y al final corremos el query con "run(callback)", y ponemos nuestro callback
+de quien nos mando a llamar de la misma manera traera "error, doc" como
+parametros, ya es cuestion de quien llamo esta funcion que revise sus
+documentos q regresamos
+
+128: exportamos nuestro objeto con toda la funcionalidad
+
+Bien pues aqui termina la creacion de los modelos y su controller para usarlo
+en nuestra app, la prox veremos como hacer pruebas para los modelos y las
+rutas
+
+Pueden ver el codigo en:
+
+[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-
+mexico/nomi-nation)
+
+Saludos
