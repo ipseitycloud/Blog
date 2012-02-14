@@ -157,7 +157,7 @@ Dashboard.jade
                                         a(href="#") #{t('dashboard.erase')}
                                 - for (var i =4; i                                tr
                                         td User #{i}
-                                        td #{Math.floor(Math.random()*11)}
+                                        td #{Math.floor(Math.random()\*11)}
                                         td
                                             a(href="#") #{t('dashboard.vote')}
                                             | /
@@ -309,10 +309,10 @@ El css aparte de lo de html5boilerplate es el siguiente:
 
     
 <pre class="brush: css">
-    /* =============================================================================
+    /\* =============================================================================
        Primary styles
        Author: mrpix
-       ========================================================================== */
+       ========================================================================== \*/
     .logo{
         text-align: center;
     }

@@ -1,0 +1,890 @@
+{
+    "title" : "Nodejs parte 9 - rutas y ajax",
+    "date" : "01/19/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Lista la ui vamos a ponerla a trabajar, primero vamos creando nuestras rutas
+para manejar todos los posibles request desde nuestro front-end, tenemos que
+manejar las nominaciones, creacion, borrado, agregado de usaurio, terminacion
+y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
+
+    
+<pre class="brush: js">
+    /\*\*
+     \* Rutas dashboard
+    \*/
+    var fb = require('facebook-js'),
+     url = 'http://nomination.cloudno.de/';
+    
+    function findIndexByKeyValue(obj, key, value)
+    {
+     var l = obj.length;
+     for (var i = 0; i < l; i++) {
+     if (obj[i][key] == value) {
+     return i;
+     }
+     }
+     return -1;
+    }
+    
+    module.exports = function(app, log){
+     var nominator = require('../controllers/nominator.js');
+    
+    app.error(function(err, req, res, next){
+     log.error('Error: ' + err);
+     if (err.message === 'nli'){
+     res.redirect('?error='+err.message);
+     }else{
+     res.send(err.message);
+     }
+     });
+    
+    function checkUser(req, res, next){
+     if (req.session.user){
+     next();
+     }else{
+     log.notice('someone try to go directly to dashboard on: ' +
+     new Date() );
+     next(new Error('nli'));
+     }
+     }
+     /\*\*
+     \* Dashboard landing
+     \*/
+     app.get('/dashboard', checkUser, function(req, res){
+     log.notice('landed on dashboard user: ' +
+     req.session.user.id + ' on: ' + new Date() );
+     var invited = req.param('invited');
+     res.render('dashboard', { user: req.session.user, error : req.param('error'), type: 'dashboard', invited: invited });
+     });
+    
+    /\*\*
+     \* lista de amigos de facebook
+     \*/
+     app.get('/friends', checkUser, function(req, res){
+     fb.apiCall('GET', '/me/friends', {access_token: req.session.user.access_token}, function(error, response, body){
+     if (error){
+     log.debug('error getting friends list:' + error);
+     throw new Error('Error getting friends list');
+     }
+     log.notice('getting friends from user:' + req.session.user.id);
+     res.json(body);
+     });
+     });
+    
+    /\*\*
+     \* lista de mis nominaciones
+     \*/
+     app.get('/nominations/mine', checkUser, function(req, res){
+     nominator.findMyNominations(req.session.user.id,function(err, data){
+     if (err) { log.debug('error getting nominations:' + err); res.json(null); return; }
+     res.json(data);
+     });
+     });
+    
+    /\*\*
+     \* lista de nominaciones donde vote
+     \*/
+     app.get('/nominations/voted', checkUser, function(req, res){
+     nominator.findVoted(req.session.user.id,function(err, data){
+     if (err) { log.debug('error getting nominations:' + err); res.json(null); return; }
+     res.json(data);
+     });
+     });
+    
+    /\*\*
+     \* lista de nominaciones donde estoy nominado
+     \*/
+     app.get('/nominations/appear', checkUser, function(req, res){
+     nominator.findNominated(req.session.user.id,function(err, data){
+     if (err) { log.debug('error getting nominations:' + err); res.json(null); return; }
+     res.json(data);
+     });
+     });
+    
+    /\*\*
+     \* regresar nominacion
+     \*/
+     app.get('/nominations/:id', checkUser, function(req, res){
+     nominator.findNomination(req.params.id,function(err, data){
+     if (err) { log.debug('error getting nominations:' + err); res.json(null); return; }
+     res.json(data);
+     });
+     });
+    
+    /\*\*
+     \* Crear nominacion
+     \*/
+     app.post('/nominations/create', checkUser, function(req, res){
+     var nomination = {
+     'name' : req.param('name'),
+     'owner' : req.session.user.id,
+     'endDate' : new Date(req.param('datep')),
+     'category' : "cat1",
+     'sub_cat' : "sub1",
+     'active' : true
+     };
+     nominator.createNomination(nomination, function(err, doc){
+     if (err) { log.debug(err); return; }
+     log.notice('nomination '+ req.param('name') +' created by: ' + req.session.user.id );
+     res.json(doc);
+     });
+     });
+    
+    /\*\*
+     \* Borrar nominacion
+     \*/
+     app.post('/nominations/erase', checkUser, function(req, res){
+     //TODO: erase nomination
+     var id = req.param('id');
+     nominator.eraseNomination(id, function(err){
+     if (err) { log.debug(err); res.json(null); return; }
+     log.notice('nomination '+ req.param('name') +' erased by: ' + req.session.user.id );
+     res.json(true);
+     });
+     });
+    
+    /\*\*
+     \* Votar en nominacion
+     \*/
+     app.post('/nominations/vote', checkUser, function(req, res){
+     //TODO: vote nomination, write in own wall, try to write in other user wall
+     var voterid = req.session.user.id;
+     var id = req.param('id');
+     var userid = req.param('userid');
+     //add a friend, try to write to the user wall and local
+     nominator.findNomination(id,function(err, doc){
+     if (err) { log.debug('error getting nominations:' + err); res.json(null); return; }
+     nominator.vote(doc, voterid, userid, function(err, nom){
+     if (err) { log.debug('error getting nominations:' + err); res.json(null); return; }
+     var index = findIndexByKeyValue(nom.users, "_id", req.param('userid'));
+     res.json(nom.users[index].votes);
+     //post to my wall that i voted
+     fb.apiCall(
+     'POST',
+     '/'+voterid+'/feed',
+     {
+     access_token: req.session.user.access_token,
+     message: 'Vote por "' + nom.users[index].name + '" en "' +
+     nom.name + '" en nomi-nation, vota tu tambien',
+     name: "Votar",
+     link: url + '?invited=' + req.param('id')
+     },
+     function (error, response, body) {
+     if (error) { log.debug('error posting on my wall'); return; }
+     log.notice('posted on current user wall: ' + voterid);
+     }
+     );
+     //post to the victim
+     fb.apiCall(
+     'POST',
+     '/'+nom.users[index]._id+'/feed',
+     {
+     access_token: req.session.user.access_token,
+     message: 'Vote por ti en "' + nom.name + '" en nomi-nation ' +
+     'vota tu tambien',
+     name: "Votar",
+     link: url + '?invited=' + req.param('id')
+     },
+     function (error, response, body) {
+     if (error) { log.debug('error posting on voted user'); return; }
+     log.notice('posted on the voted user wall: ' + nom.users[index]._id);
+     }
+     );
+     log.notice('nomination '+ req.param('id') +' voted by: ' + req.session.user.id );
+     });
+     });
+     });
+    
+    /\*\*
+     \* Agregar usuario a nominacion
+     \*/
+     app.post('/nominations/adduser', checkUser, function(req, res){
+     var users = req.param('users');
+     var id = req.param('id');
+     //add a friend, try to write to the user wall and local
+     nominator.findNomination(id,function(err, doc){
+     if (err) { log.debug('error getting nominations:' + err); res.json(null); return; }
+     nominator.addUser(doc, users, function(err){
+     if (err) { log.debug('error adding users'); res.json(null); return; }
+     res.json(true);
+     var usersl = req.param('users');
+     var userl = 0;
+     if (usersl instanceof Array){
+     userl = usersl.length;
+     for (var i=0;i<userl;i++){
+     fb.apiCall(
+     'POST',
+     '/'+usersl[i]._id+'/feed',
+     {
+     access_token: req.session.user.access_token,
+     message: 'Te agregue a "' + doc.name + '" en nomi-nation ' +
+     'agrega a tus amigos tambien',
+     name: "Votar",
+     link: url + '?invited=' + req.param('id')
+     },
+     function (error, response, body) {
+     if (error) { log.debug('error posting on voted user'); return; }
+     log.notice('posted on the added user wall: ' + usersl[i]._id);
+     }
+     );
+     }
+     }else{
+     fb.apiCall(
+     'POST',
+     '/'+usersl._id+'/feed',
+     {
+     access_token: req.session.user.access_token,
+     message: 'Te agregue a "' + doc.name + '" en nomi-nation ' +
+     'agrega a tus amigos tambien',
+     name: "Votar",
+     link: url + '?invited=' + req.param('id')
+     },
+     function (error, response, body) {
+     if (error) { log.debug('error posting on voted user'); return; }
+     log.notice('posted on the added user wall: ' + usersl._id);
+     }
+     );
+     }
+     });
+     });
+     });
+    
+    /\*\*
+     \* Borrar usuario de nominacion
+     \*/
+     app.post('/nominations/eraseuser', checkUser, function(req, res){
+     //just erased, dont notice anyone ![:(](http://udiweb.com.mx/wp-includes/images/smilies/icon_sad.gif)
+     var user = req.param('user');
+     var id = req.param('id');
+     //add a friend, try to write to the user wall and local
+     nominator.findNomination(id,function(err, doc){
+     if (err) { log.debug('error getting nominations'); res.json(null); return; }
+     if (user === 'eraseme'){
+     var index = findIndexByKeyValue(doc.users, "_id", req.session.user.id);
+     user = doc.users[index];
+     }
+     nominator.eraseUser(doc, user, function(err){
+     if (err) { log.debug('error erasing nominations'); res.json(null); return; }
+     res.json(true);
+     });
+     });
+     });
+    
+    /\*\*
+     \* Terminar nominacion
+     \*/
+     app.post('/nominations/end', checkUser, function(req, res){
+     //TODO: end the nomination and declare a winner
+     var id = req.param('id');
+     nominator.findNomination(id,function(err, doc){
+     if (err) { log.debug('error getting nominations:' + err); res.json(null); return; }
+     var users = doc.users;
+     var usersl = doc.users.length;
+     var voters = doc.voters;
+     var votersl = doc.voters.length;
+     var winner = users[0];
+     for (var j=1; j<usersl;j++){
+     if (winner.votes < users[j].votes){
+     winner = users[j];
+     }
+     }
+     res.json(winner);
+     fb.apiCall(
+     'POST',
+     '/'+req.session.user.id+'/feed',
+     {
+     access_token: req.session.user.access_token,
+     message: winner.name + ' gano "' + doc.name + '" en nomi-nation ' +
+     'crea tu propia nominacion',
+     name: "Crear",
+     link: url + '?invited=' + req.param('id')
+     },
+     function (error, response, body) {
+     if (error) { log.debug('error posting on voted user'); return; }
+     log.notice('posted on the created user wall: ' + req.session.user.id);
+     }
+     );
+     for (var i=0;i<usersl;i++){
+     if (users[i]._id == req.session.user.id){ continue; }
+     fb.apiCall(
+     'POST',
+     '/'+users[i]._id+'/feed',
+     {
+     access_token: req.session.user.access_token,
+     message: winner.name + ' gano "' + doc.name + '" en nomi-nation ' +
+     'crea tu propia nominacion',
+     name: "Crear",
+     link: url
+     },
+     function (error, response, body) {
+     if (error) { log.debug('error posting on voted user'); return; }
+     log.notice('posted on the user wall: ' + users[i]._id);
+     }
+     );
+     }
+     nominator.eraseNomination(id, function(err){
+     if (err) { log.debug('error erasing nomination'); return; }
+     log.notice('nomination '+ req.param('name') +' erased by: ' + req.session.user.id );
+     });
+     for (var i=0;i<votersl;i++){
+     if (voters[i]._id == req.session.user.id){ continue; }
+     fb.apiCall(
+     'POST',
+     '/'+voters[i]._id+'/feed',
+     {
+     access_token: req.session.user.access_token,
+     message: winner.name + ' gano "' + doc.name + '" en nomi-nation ' +
+     'crea tu propia nominacion',
+     name: "Crear",
+     link: url
+     },
+     function (error, response, body) {
+     if (error) { log.debug('error posting on voted user'); return; }
+     log.notice('posted on the user wall: ' + voters[i]._id);
+     }
+     );
+     }
+     nominator.eraseNomination(id, function(err){
+     if (err) { log.debug('error erasing nomination'); return; }
+     log.notice('nomination '+ req.param('name') +' erased by: ' + req.session.user.id );
+     });
+     });
+     });
+    
+    };
+</pre>
+
+Primero vamos viendo nuestro middleware y una pequeña funcion de ayuda
+
+Linea 7-16: findIndexByKeyValue esta funcion nos servira para encontrar el
+index de cierto objeto en el array, como es algo que usaremos varias veces lo
+cree su propia funcion
+
+21-28: app.error nos servirá para tomar cualquier error q mande la aplicación
+y mandarlo a la aplicación para que la app se encargue de mostrarlo
+
+30-38: pequeño middleware para revisar q el usauro este logueado, si esta
+seguimos con la siguiente funcion q es "next" sino lo mandamos el error "nil"
+que para nosotros es un codigo en nuestro archivo de strings que dice q el
+usuario no esta logueado, esta funcion sera usada por todas nuestras rutas q
+necesite el usuario en session
+
+Nota en middleware: notese q el middleware se pone antes de la funcion que
+maneja la ruta, se pueden poner cuantos middleware se quiera divididos por
+coma, supongamos que tenemos la funcion "checkotherstuff" tambien, entonces
+seria, "checkuser, checkstuff, function…" , asi concatenamos los necesarios.
+
+Ahora si las rutas
+
+42-61: el dashboard es sencillo, usamos nuestro middleware ysi todo esta bien
+rendereamos el dashboard.jade como lo preparamos en la session anterior, get
+friends, aqui usamos el api de facebook para traernos la lista de amigos del
+usuario logueado, sino hay errores regresamos el json con el array de amigos.
+
+66-91: Aqui tomamos las listas dependiendo de la que nos pidan es la funcion
+del controller q usamos, mandamos el usuario en session al controller y
+regresamos el json con el array de nominaciones, lo mismo para las demas
+funciones… otra forma de hacer esto sin poner tantas funciones seria poner un
+parametro en la ruta con :type y la ruta quedaria como "/nominations/:type" y
+ya por codigo vemos q tipo es y traemos esa lista, pero para sencillez lo
+dejamos asi
+
+138-185: votar por un usuario, tomamos los parametros mandados por post, el
+usaurio votando q es el q esta en session, la id de la nominacion y el usuario
+a votar, buscamos la nominacion, si todo esta bien votamos por ella, si todo
+esta bien regresamos el numero de votaciones q tiene ese usuario, posteamos en
+el muro del que voto y en el muro de quien votaron, sino es su amigo o no deja
+escribir en su muro no llegara nada.
+
+Todas las demas rutas son similares, si tiene duda en alguna no duden en
+preguntar
+
+Bien ahora veamos como usar todo esto desde nuestro cliente, vamos a poner
+todo esto en nuestro script.js:
+
+    
+<pre class="brush: js">
+    /\* Author: mrpix
+    \*/
+    var options = {
+     ns: { namespaces: ['translation'], defaultNs: 'translation'},
+     useLocalStorage: true,
+     resGetPath: 'locales/resources.json?lng=__lng__&ns=__ns__',
+     dynamicLoad: true
+    };
+    $.i18n.init(options, function() {
+     //TODO: add more text
+    });
+    // expresion para buscar texto que contenga cierto termino
+    jQuery.expr[':'].Contains = function(a,i,m){
+     return (a.textContent || a.innerText || "").toUpperCase().indexOf(m[3].toUpperCase())>=0;
+    };
+    // expresion para buscar texto que sea igual a otro
+    jQuery.extend(jQuery.expr[':'], {
+     containsExactly: "$(a).text() == m[3]"
+    });
+    //mostrar mensajes modales
+    function showMsg(title, msg, extra){
+     var dialog = $( "#dialog-modal" );
+     dialog.attr('title', $.t(title));
+     if (extra){
+     dialog.find('#msg').text($.t(msg, {winner: extra}));
+     }else{
+     dialog.find('#msg').text($.t(msg));
+     }
+     dialog.dialog('open');
+    }
+    $(function() {
+     //instanciar dialogo
+     $( "#dialog-modal" ).dialog({
+     autoOpen: false,
+     modal: true,
+     buttons: {
+     Ok: function() {
+     $( this ).dialog( "close" );
+     }
+     }
+     });
+     //guardamos la lista para futuras referencias
+     var list = $('#selectable');
+     //funcion para votar por un usuario
+     var vote = function(ev){
+     ev.preventDefault();
+     var a = $(this);
+     var tr = a.parent().parent();
+     var id = tr.attr('id');
+     var nid = $('.details').attr('nid');
+     var name = $('.details').find('legend').text();
+     $.post("/nominations/vote", { id: nid, userid: id },
+     function(data) {
+     if (data){
+     var votes = tr.find('.votes');
+     votes.html(data);
+     }else{
+     showMsg('dashboard.error', 'dashboard.error_voting');
+     }
+     }
+     ).error(function() {showMsg('dashboard.error', 'dashboard.error_voting'); });
+     var list = $('#voted');
+     var found = list.find('li:containsExactly('+name+')');
+     if (found.length < 1){
+     var li = $('<li id="'+nid+'" type="voted"><input type="checkbox" /><label>'+name+'</label></li>');
+     list.append(li);
+     li.find("label").click(checkOne);
+     li.find("input").click(checkOne);
+     }
+     };
+     //funcion para borrar usuario
+     var erase = function(ev){
+     ev.preventDefault();
+     var a = $(this);
+     var tr = a.parent().parent();
+     var id = tr.attr('id');
+     var name = tr.find('.name').text();
+     var votes = tr.find('.votes').text();
+     var nid = $('.details').attr('nid');
+     var user = {
+     _id : id,
+     name : name,
+     votes : votes
+     };
+     $.post("/nominations/eraseuser", { id: nid, user: user },
+     function(data) {
+     if (data){
+     tr.remove();
+     }else{
+     showMsg('dashboard.error', 'dashboard.error_erasing_user');
+     }
+     }
+     ).error(function() { showMsg('dashboard.error', 'dashboard.error_erasing_user'); });
+     };
+     //cargando amigos del usuario en session
+     function loadUsers(next){
+     $.getJSON(next || '/friends', function(data) {
+     if (data.data.length > 0){
+     $.each(data.data, function(key, value){
+     list.append('<li class="ui-state-default" id="'+value.id+'"><img width="30px" src="https://graph.facebook.com/'+value.id+'/picture"/><a>'+value.name+'</a></li>');
+     });
+     loadUsers(data.paging.next);
+     }else{
+     return;
+     }
+     }).error(function() { showMsg('dashboard.error', 'dashboard.error_friends'); });
+     }
+     //cargando nominaciones del usuario en session, depende del tipo
+     function loadNominations(type){
+     $.getJSON('/nominations/'+type, function(data) {
+     var list = $('#'+type);
+     if (data.length < 1 ){
+     //showMsg('dashboard.warning', 'dashboard.warning_zarro');
+     }else{
+     $.each(data, function(key, value){
+     list.append('<li id="'+value._id+'" type="'+type+'"><input type="checkbox" /><label>'+value.name+'</label></li>');
+     });
+     }
+     list.find("label").click(checkOne);
+     list.find("input").click(checkOne);
+     }).error(function() { showMsg('dashboard.error', 'dashboard.warning_nominations'); });
+     }
+     //para q solo se puede seleccionar una nominacion a la vez
+     function checkOne(){
+     var currentEl = $(this);
+     $("input:checked").each(function(){
+     $(this).attr('checked', false);
+     });
+     if (currentEl.is('input')){
+     currentEl.attr('checked', true);
+     showNomination(currentEl.parent().attr('id'), currentEl.parent().attr('type'));
+     return;
+     }
+     var checkbox = currentEl.siblings('input');
+     checkbox.attr('checked', !checkbox.attr('checked'));
+     showNomination(currentEl.parent().attr('id'), currentEl.parent().attr('type'));
+     }
+     //cargar la nominacion y llenar details
+     function showNomination(id, type, refresh){
+     //TODO: show avatar
+     $.getJSON('/nominations/'+id, function(data) {
+     if (!data){
+     //alert('Du! nominacion ya no existe o termino ![:(](http://udiweb.com.mx/wp-includes/images/smilies/icon_sad.gif) ');
+     showMsg('dashboard.warning', 'dashboard.warning_erased');
+     }
+     var details = $('.details');
+     details.attr('nid', data._id);
+     details.find('legend').html(data.name);
+     var daten = new Date(''+data.endDate);
+     details.find('.date').html($.t('dashboard.end_date')+' '+ daten.getDate()+'/'+(daten.getMonth()+1)+'/'+daten.getUTCFullYear());
+     details.find('.refresh').attr('nid', data._id);
+     details.find('.refresh').attr('type', type);
+     var ntype = type;
+     //console.log(data._id);
+     if (ntype === 'appear'){
+     $('#end').hide();
+     $('#cancel').hide();
+     $('#remove').show();
+     }else if (type === 'mine'){
+     $('#end').show();
+     $('#cancel').show();
+     $('#remove').hide();
+     }else{
+     $('#end').hide();
+     $('#cancel').hide();
+     $('#remove').hide();
+     }
+     var tbody = details.find('.userst').find('tbody');
+     tbody.html('');
+     var userl = data.users.length;
+     for (var i=0; i<userl;i++){
+     var id = data.users[i]._id;
+     var name = data.users[i].name;
+     var votes = data.users[i].votes;
+     var tr = $('<tr id="'+id+'"></tr>');
+     tr.append('<td class="pic"><img width="20px" src="https://graph.facebook.com/'+id+'/picture"/></td>');
+     tr.append('<td class="name">'+name+'</td>');
+     tr.append('<td class="votes">'+votes+'</td>');
+     var avote = $('<a class=".vote" href="#">'+$.t('dashboard.vote')+'</a>');
+     avote.click(vote);
+     var aerase = $('<a class=".erase" href="#">'+$.t('dashboard.erase')+'</a>');
+     aerase.click(erase);
+     var menu = $('<td></td>');
+     menu.append(avote);
+     menu.append(' / ');
+     menu.append(aerase);
+     menu.appendTo(tr);
+     tbody.append(tr);
+     }
+     if (!refresh){
+     details.show('slide');
+     }
+     }).error(function() { showMsg('dashboard.error', 'dashboard.error_showing'); });
+     }
+     //actualizar la nominacion en contexto
+     $('.refresh').click(function(ev){
+     ev.preventDefault();
+     showNomination($(this).attr('nid'), $(this).attr('type'), 'refresh');
+     });
+     //cargar las nominaciones y usuarios
+     loadNominations('mine');
+     loadNominations('appear');
+     loadNominations('voted');
+     loadUsers(null);
+     //viene referenciado, mostrar esa nominacion
+     var invited = $('.invited');
+     if (invited[0]){
+     showNomination(invited.attr('invited'), 'voted');
+     }
+     //para filtrar la lista de amigos
+     $("#filterinput").change( function () {
+     var filter = $(this).val();
+     if(filter) {
+     // this finds all links in a list that contain the input,
+     // and hide the ones not containing the input while showing the ones that do
+     list.find("a:not(:Contains(" + filter + "))").parent().hide();
+     list.find("a:Contains(" + filter + ")").parent().show();
+     } else {
+     list.find("li").show();
+     }
+     return false;
+     }).keyup( function () {
+     // fire the above change event after every letter
+     $(this).change();
+     });
+     //inicializar el seleccionador de fecha
+     $( "#datep" ).datepicker();
+     //hacer seleccionable la lista de nominaciones
+     $( "#selectable" ).selectable();
+     //abrir el dialog de nueva nominacion
+     $("#nn").click(function(){
+     $( "#dialog-new" ).dialog( "open" );
+     });
+     //abrir el dialogo de agregar usuarios
+     $("#am").click(function(){
+     $( "#dialog-add" ).dialog( "open" );
+     });
+     //creamos el dialogo de nueva nominacion
+     $( "#dialog-new" ).dialog({
+     autoOpen: false,
+     height: 300,
+     width: 450,
+     modal: true,
+     buttons: {
+     //TODO: put a t string :S
+     "Create a nomination": function() {
+     var dialog = $(this);
+     var name = dialog.find('#name').val();
+     var datep = dialog.find('#datep').val();
+     $.post("/nominations/create", { name: name, datep: datep },
+     function(data) {
+     var list = $('#mine');
+     var li = $('<li id="'+data._id+'" type="mine"><input type="checkbox" checked="true" /><label>'+data.name+'</label></li>');
+     list.append(li);
+     li.find("label").click(checkOne);
+     li.find("input").click(checkOne);
+     li.find("label").trigger('click');
+     dialog.dialog( "close" );
+     }
+     ).error(function() { showMsg('dashboard.error', 'dashboard.warning_creating'); });
+     },
+     Cancel: function() {
+     $( this ).dialog( "close" );
+     }
+     },
+     close: function() {
+     var dialog = $(this);
+     dialog.find('#name').val('');
+     dialog.find('#datep').val('');
+     }
+     });
+     //creamos el dialog de agregar usuarios
+     $( "#dialog-add" ).dialog({
+     autoOpen: false,
+     height: 300,
+     width: 450,
+     modal: true,
+     buttons: {
+     "Add friend(s)": function() {
+     var dialog = $(this);
+     var tbody = $('.details').find('.userst').find('tbody');
+     var users = [];
+     var userp;
+     $('#selectable').find('.ui-selected').each(function(key, value){
+     users.push({
+     "_id" : $(value).attr('id'),
+     "name" : $(value).text(),
+     "votes" : 0
+     });
+     });
+     var ul = users.length;
+     if (ul > 0 && ul <= 1){
+     userp = users[0];
+     }else{
+     userp = users;
+     }
+     var nid = $('.details').attr('nid');
+     $.post("/nominations/adduser", { id: nid, users: userp },
+     function(data) {
+     if (data){
+     $.each(users,function(key, value){
+     var id = value._id;
+     var name = value.name;
+     var tr = $('<tr id="'+id+'"></tr>');
+     tr.append('<td class="pic"><img width="20px" src="https://graph.facebook.com/'+id+'/picture"/></td>');
+     tr.append('<td class="name">'+name+'</td>');
+     tr.append('<td class="votes">0</td>');
+     var avote = $('<a class=".vote" href="#">'+$.t('dashboard.vote')+'</a>');
+     avote.click(vote);
+     var aerase = $('<a class=".erase" href="#">'+$.t('dashboard.erase')+'</a>');
+     aerase.click(erase);
+     var menu = $('<td></td>');
+     menu.append(avote);
+     menu.append(' / ');
+     menu.append(aerase);
+     menu.appendTo(tr);
+     tbody.append(tr);
+     });
+     dialog.dialog( "close" );
+     }else{
+     dialog.dialog( "close" );
+     showMsg('dashboard.error', 'dashboard.error_adduser');
+     }
+     }
+     ).error(function() { showMsg('dashboard.error', 'dashboard.error_adduser'); });
+     },
+     Cancel: function() {
+     $( this ).dialog( "close" );
+     }
+     },
+     close: function() {
+     //TODO:
+     }
+     });
+     //para cancelar nominacion
+     $('#cancel').click(function(ev){
+     ev.preventDefault();
+     var nid = $('.details').attr('nid');
+     $.ajax({
+     type: 'POST',
+     url: '/nominations/erase',
+     data: {id : nid},
+     success: function(data){
+     if (!data){ showMsg('dashboard.error', 'dashboard.error_erasing'); return;}
+     showMsg('dashboard.warning', 'dashboard.warning_erasing');
+     $('#'+nid).remove();
+     while($('#'+nid).length > 0){
+     $('#'+nid).remove();
+     }
+     $('.details').hide();
+     },
+     error: function(){
+     showMsg('dashboard.error', 'dashboard.error_erasing');
+     },
+     dataType: 'json'
+     });
+     });
+     //para terminar nominacion
+     $('#end').click(function(ev){
+     ev.preventDefault();
+     var nid = $('.details').attr('nid');
+     $.ajax({
+     type: 'POST',
+     url: '/nominations/end',
+     data: {id : nid},
+     success: function(data){
+     if (!data){ showMsg('dashboard.error', 'dashboard.error_ending'); return;}
+     showMsg('dashboard.warning','dashboard.win', data.name);
+     $('#'+nid).remove();
+     while($('#'+nid).length > 0){
+     $('#'+nid).remove();
+     }
+     $('.details').hide();
+     },
+     error: function(){
+     showMsg('dashboard.error', 'dashboard.error_ending');
+     },
+     dataType: 'json'
+     });
+     });
+     //para remover al usuario actual de la nominacion
+     $('#remove').click(function(ev){
+     ev.preventDefault();
+     var uid = $(this).attr('uid');
+     var nid = $('.details').attr('nid');
+     $.post("/nominations/eraseuser", { id: nid, user: 'eraseme' },
+     function(data) {
+     if (data){
+     //get the row of the user and erase it
+     $('.details').find('#'+uid).remove();
+     }else{
+     showMsg('dashboard.error', 'dashboard.error_removing');
+     }
+     }
+     ).error(function() { showMsg('dashboard.error', 'dashboard.error_removing'); });
+     });
+     //escuchar por los clicks en votar y borrar
+     $('.vote').click(vote);
+     $('.erase').click(erase);
+    });
+</pre>
+
+Linea 1-11: iniciamos el i18next
+
+12-19: extendemos la funcionalidad de jquery para encontrar texto q contenga o
+q sea igual al termino seleccionado
+
+21-30: para mostrar un dialogo modal con errores o anuncios al usuario y no
+usar un alert
+
+33-41: iniciamos nuestro dialogo para mensajes
+
+45-94: votar y borrar usuario, prevenimos el comportamiento regular con
+"preventDefault", nos traemos los datos del dom y hacemos un post con jquery,
+mandando estos datos a "/nominations/vote" o erase, si todo sale bien en votes
+actualizamos el numero de votación con lo q regresa el servicio, y agregamos
+la nominacion a la lista de donde vote sino existe y si es erase borramos de
+la tabla al usuario, en cualquier error mostramos un dialogo
+
+96-107: cargamos la lista de amigos de usuario de manera recursiva, ya que
+facebook nos regresa el url de los siguientes 100 usuarios, así los cargamos
+todos de un jalón, este script da errores en opera por el loop, aunque aun no
+eh visto como arreglarlo, alguien sabe?
+
+109-122: cargamos las nominaciones de cada tipo y vamos agregándola a la lista
+de nominaciones de la izquierda
+
+124-137: ya sea seleccionando por el label o por el checkbox solo queremos q
+se seleccione una ya que al seleccionarla se cargan los datos de ella, así que
+de-seleccionamos lo demás y dejamos solo el que el usuario presiono
+
+139-194: cargamos una nominacion y con jquery llenamos los detalles y vamos
+agregando datos a la tabla de usuarios con un for y generando el dom
+manualmente con jquery, pudimos haber usado minimal, pero para no meter mas
+dependencias, lo dejamos con puro jquery
+
+239-334: los botones de agregar nueva nominacion y agregar mas usuarios abren
+un dialogo, en el primero solo pide el nombre de la nominacion y la fecha de
+terminación, el otro despliega la lista de amigos del usuario logueado con un
+filtro en la parte superior para buscar rápido un usuario en particular… vean
+que la lista se carga en cuanto entran a la pagina para no tener delay cuando
+abran este dialogo y no se cargue cada vez que quieran invitar amigos
+
+336-396: botones cancelar, remover y terminar: cancelar borra la nominacion
+sin declarar ningun ganador ni notificar a nadie, remover es si no te pareció
+salir en alguna nominacion puedas borrarte, al borrarte no te pueden agregar
+de nuevo y terminar es para declarar un ganador y terminar la nominacion,
+todos los participantes serán notificados si el usuario en cuestión puede
+escribir en sus walls
+
+Bien pues esto no pretende ser un curso de jquery por eso me fui rápido por la
+parte del cliente pero si alguien necesita, con todo gusto me puedo extender
+en que hace cada cosa.
+
+También si necesitan ver como crear una aplicación en facebook o como deployar
+su aplicación de node.js no duden en preguntar.
+
+Ya con esto tenemos una aplicación con una funcionalidad decente, aunque le
+faltan varios puntos de mejora, pero por el momento la dejamos funcionando en
+un server y empezamos a notificar a los usuarios para que se empiece a usar,
+empiecen a nominar a sus amigos en:
+
+http://nomination.cloudno.de
+
+Cualquier feedback pásenlo por aquí o en la pagina de facebook
+
+<a href="https://www.facebook.com/pages/Nomi-
+nation/354591181220133″>https://www.facebook.com/pages/Nomi-
+nation/354591181220133</a>
+
+Por otra parte logo aun no tenemos, sofy esta pensando en uno, si alguien mas
+tiene input de diseño pásenlo y lo tomamos en cuenta
+
+Revisen el codigo en github
+
+<a href="https://github.com/nodejs-mexico/nomi-nation">https://github.com
+/nodejs-mexico/nomi-nation</a>
+
+En la próxima solo agregaremos algunas cosas extras, crearemos nuestro readme
+en github y listo
+
+Saludos

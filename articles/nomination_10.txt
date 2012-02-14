@@ -1,0 +1,282 @@
+{
+    "title" : "Nodejs parte 10 - ultimos toques",
+    "date" : "01/20/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Vamos haciendo ya una versión beta con la mayor funcionalidad que podamos,
+integrando algún tipo de búsqueda, una forma de invitar amigos, un logo y
+arreglamos los bugs que nos hayan reportado los usuarios que ya la probaron…
+
+1. Vamos restringiendo el voto a solo una vez al dia… en este caso cambiaremos
+un poco como se agregan los votantes, esta parte en realidad la agrego
+https://github.com/alejandromg que lleva el blog de nodehispano, pero a
+grandes rasgos cuando se agrega un votante se agrega por su id y le fecha de
+su ultima votacion, tambien cambiamos la validacion para buscar donde ah
+votado el usuario para encontrarnos con esta lista ya que el array de votantes
+cambio
+
+2. Para agregar búsquedas, agregamos un pequeño input text con una forma en
+nuestro layout, con jquery escuchamos al evento submit y mandamos con ajax la
+busqueda y mostramos la lista de nominaciones que encontramos
+
+Agregamos esto en el header de nuestro dashboard.jade
+
+    
+<pre class="brush: js">
+    form#sf(action="#")
+                input.search(type="text", placeholder="Search")
+</pre>
+
+y esto al final para mostrar los resultados
+
+    
+<pre class="brush: js">
+    #dialog-sr(title="#{t('dashboard.search_results')}")
+        form
+            fieldset#sr
+</pre>
+
+esto a nuestro dashboard.js para agregar la ruta
+
+    
+<pre class="brush: js">
+        /\*\*
+         \* buscar nominaciones
+         \*/
+        app.post('/nominations/search', checkUser, function(req, res){
+            var term = req.param('term');
+            nominator.findNominationByName( term, function(err, data){
+                if (err) { log.debug('error getting nominations:' + err); res.json(null); return; }
+                res.json(data);
+            });
+        });
+</pre>
+
+Nuestro controller para agregar las búsquedas a la db
+
+    
+<pre class="brush: js">
+    /\*\*
+     \* find nominations by term
+     \* @term nomination name or term
+     \* @callback function
+     \*
+     \*/
+    NOMINATOR.findNominationByName = function(term, callback){
+        //TODO: scape this
+        var myregex = RegExp(term);
+        Nomination.find({name: myregex},['name', 'id'], callback);
+    };
+</pre>
+
+y jquery en script.js
+
+    
+<pre class="brush: js">
+    $('#sf').submit(function(){
+            var searchTerm = $('#sf').find('.search').val();
+            if (searchTerm){
+                $('.loading').show();
+                //console.log(searchTerm);
+                $.post("/nominations/search", { term: searchTerm },
+                    function(data) {
+                        if (data){
+                            var datal = data.length;
+                            if (datal <1 ){
+                                showMsg('dashboard.warning', 'dashboard.notfound');
+                                $('.loading').hide();
+                                return;
+                            }
+                            var dialog = $( '#dialog-sr' );
+                            var fs = dialog.find('#sr');
+                            fs.html('');
+                            for (var i=0;i<datal;i++){
+                                fs.append('<input type="radio" name="sr" value="'+data[i]._id+'"> '+data[i].name+'<br>');
+                            }
+                            dialog.dialog('open');
+                        }else{
+                            showMsg('dashboard.error', 'dashboard.error_searching');
+                        }
+                        $('.loading').hide();
+                    }
+                ).error(function() { $('.loading').hide(); showMsg('dashboard.error', 'dashboard.error_searching'); });
+            }
+            return false;
+        });
+</pre>
+
+3. Para poder invitar a mas amigos a la app hacemos algo similar, agregamos un
+link despues del input de la busqueda, cachamos el evento con jquery y
+mostramos la lista de amigos a invitar y desde node escribimos en el muro de
+los usuarios a invitar
+
+Dashboard.jade
+
+en el header
+
+    
+    
+    div
+        a.invite(href="#") Invite
+    
+
+al final
+
+    
+    
+    #dialog-invite(title="#{t('dashboard.invite_friends')}")
+        form#filterformi(action="#")
+            input#filterinputi(type="text")
+        br
+        form
+            fieldset
+                ol#selectablei
+    
+
+Agregamos la ruta a nuestro dashboard.js
+
+    
+<pre class="brush: js">
+    /\*\*
+         \* Invitar amigos
+         \*/
+        app.post('/invite', checkUser, function(req, res){
+            var usersl = req.param('users');
+            var userl = 0;
+            var onerror;
+            if (usersl instanceof Array){
+                userl = usersl.length;
+                onerror = function (error) {
+                            if (error) { log.debug('error posting on voted user'); return; }
+                        };
+                for (var i=0;i<userl;i++){
+                    fb.apiCall(
+                        'POST',
+                        '/'+usersl[i]._id+'/feed',
+                        {
+                            access_token: req.session.user.access_token,
+                            message: app._locals.t('dashboard.invited'),
+                            name: app._locals.t('dashboard.nominate'),
+                            link: url
+                        },
+                        onerror
+                    );
+                }
+            }else{
+                onerror = function (error) {
+                        if (error) { log.debug('error posting on voted user'); return; }
+                    };
+                fb.apiCall(
+                    'POST',
+                    '/'+usersl._id+'/feed',
+                    {
+                            access_token: req.session.user.access_token,
+                            message: app._locals.t('dashboard.invited'),
+                            name: app._locals.t('dashboard.nominate'),
+                            link: url
+                    },
+                    onerror
+                );
+            }
+            res.json(true);
+        });
+</pre>
+
+Y al final nuestro codigo jquery
+
+    
+<pre class="brush: js">
+    //creamos el dialog de agregar usuarios
+        $( "#dialog-invite" ).dialog({
+            autoOpen: false,
+            height: 300,
+        	width: 450,
+    		modal: true,
+    		buttons: {
+    			"Invite friend(s)": function() {
+                    $('.loading').show();
+                    var dialog = $(this);
+                    var users = [];
+                    var userp;
+                    $('#selectablei').find('.ui-selected').each(function(key, value){
+                        users.push({
+                            "_id" : $(value).attr('id'),
+                            "name" : $(value).text()
+                        });
+                    });
+                    var ul = users.length;
+                    if (ul > 0 && ul <= 1){
+                        userp = users[0];
+                    }else{
+                        userp = users;
+                    }
+                    $.post("/invite", { users: userp },
+                        function(data) {
+                            if (data){
+                                showMsg('dashboard.warning', 'dashboard.invited');
+                                dialog.dialog( "close" );
+                            }else{
+                                dialog.dialog( "close" );
+                                showMsg('dashboard.error', 'dashboard.warning_invited');
+                            }
+                            $('.loading').hide();
+                        }
+                    ).error(function() { $('.loading').hide(); showMsg('dashboard.warning', 'dashboard.warning_invited'); });
+    			},
+    			Cancel: function() {
+    				$( this ).dialog( "close" );
+    			}
+    		},
+    		close: function() {
+    			//TODO:
+    		}
+    	});
+    
+    $('.invite').click(function(){
+            $( "#dialog-invite" ).dialog( "open" );
+        });
+</pre>
+
+4. Agregamos todos los strings faltantes a nuestros archivos de translations
+
+5. Actualizamos los estilos
+
+6. Alejandromg encontró un bug al momento de terminar una nominación cuando no
+existían usuarios nominados, se agrego un if para revisar eso y si no hay
+usuarios solo terminarlo
+
+7. Cree un logo sencillo que me invente con gimp y alguna búsqueda rápida en
+google, la idea es un pequeño diploma en el fondo y las letras de nomination,
+quedo algo así:
+
+![](http://nomination.cloudno.de/images/ipn.png)
+
+8. Creamos el wiki con un pequeño manual que pueden ver aquí:
+
+https://github.com/nodejs-mexico/nomi-nation/wiki
+
+9. Actualizamos la pagina de facebook
+
+https://www.facebook.com/pages/Nomi-nation/354591181220133
+
+10. Cerramos los issues en github
+
+11. Damos por bueno nuestro beta y empezamos a hacer ruido en facebook para
+que se empieze a usar
+
+Listo!!, tenemos una aplicación funcionando con node.js, express y un bonche
+de módulos mas.
+
+Aun quedan bugs por terminar así que si quieres ayudar eres bienvenido.
+
+También puedes enviar sugerencias sobre funcionalidad
+
+En los siguientes posts haremos clientes móviles para la aplicación
+
+Revisen el codigo aqui:
+
+https://github.com/nodejs-mexico/nomi-nation
+
+Usen y anuncien la aplicación ![:)](http://udiweb.com.mx/wp-
+includes/images/smilies/icon_smile.gif)

@@ -1,0 +1,275 @@
+{
+    "title" : "Creando modulo para node.js",
+    "date" : "02/12/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+En esta ocasión vamos a crear un modulo para nodejs para ver si el browser que
+nos están mandando es de tipo touch, tablet, mobile, etc, no es 100% seguro
+porque solo estamos revisando el agente pero bueno es un inicio; al final lo
+subiremos al repositorio npm
+
+Primero tenemos que crear nuestros directorios, el modulo se va a llamar node-
+bowser, la estructura de archivos/folders quedara algo así:
+
+node-bowser
+
+* lib
+** node-bowser.js
+* test
+** main.js
+** test.js
+* index.js
+* license
+* package.json
+* Readme.md
+
+No usaremos dependencias para el archivo que usaremos en producción pero si
+usaremos vows como dependencia en el desarrollo para hacer nuestras pruebas,
+vamos creando nuestro "package.json":
+
+    
+    
+<pre class="brush: js">
+    {
+      "name": "node-bowser",
+      "description": "bad! browser detection for mobile, tablet and touch",
+      "version": "0.1.0",
+      "author": "Ipseitycloud, Ivan Torres ",
+      "keywords": ["browser detection ua user-agent mobile table touch"],
+      "main" : "lib/node-bowser.js",
+      "directories" : { "lib" : "./lib" },
+      "devDependencies": {
+          "vows" : "0.6.1"
+      },
+      "repository" : {"type": "git" , "url": "http://github.com/pinguxx/node-bowser.git" },
+      "engines": { "node": "> 0.2.0" }
+    }
+</pre>
+
+En esta caso estamos declarando todo lo necesario para nuestro modulo, nombre,
+descripción, author, palabras claves a la hora de buscar, que archivo correr
+que es nuestro main, los directorios donde esta todo el código, las
+dependencias de desarrollo y si tuviéramos otras también irían aquí nomas no
+como dev, si tenemos repositorio que en este casi si tenemos y en que
+versiones funciona de node funciona este modulo.
+
+Bien ahora hay que llenar nuestro índex, regularmente solo se usa para exponer
+el modulo real, el código común que veras será algo como esto:
+
+    
+    
+    
+    module.exports = require('./lib/node-bowser');
+    
+
+Lo único que estamos haciendo es exportando lo que sea que exporte el archivo
+lib/node-bowser.js, veamos que tiene este archivo
+
+    
+<pre class="brush: js">
+    var NBOWSER;
+    module.exports = NBOWSER = function(req){
+        this._agent = req.header ? req.header('user-agent') : req.headers['user-agent'].toLowerCase();
+        this._ismobile = (/iphone|ipod|android|blackberry|opera mini|opera mobi|skyfire|maemo|windows phone|palm|iemobile|symbian|symbianos|fennec/i.test(this._agent));
+        this._istablet = (/ipad|android 3|sch-i800|playbook|xoom|tablet|kindle|gt-p1000|sgh-t849|shw-m180s|a510|a511|a100|dell streak|silk/i.test(this._agent));
+    };
+    NBOWSER.prototype.isMobile = function(){
+        return this._ismobile;
+    };
+    NBOWSER.prototype.isTablet = function(){
+        return this._istablet;
+    };
+    NBOWSER.prototype.isTouch = function(){
+        return (/iphone|ipad|ipod|android/i.test(this._agent));
+    };
+    NBOWSER.prototype.isDesktop = function(){
+        return !(this._ismobile || this._istablet);
+    };
+</pre>
+
+Linea1: Aquí estamos creando nuestra variable NBOWSER que será el objeto que
+tendrá toda la funcionalidad y que exportaremos.
+
+2: exportamos el objeto q es la función que empezamos aqui le pasamos
+
+3-5: nuestras variables locales, primero tomamos el agente que nos hayan
+mandado en el req, checamos q sea un request regular o de express, otros  no
+soportados por el momento, ya que tenemos el agente checamos si es mobile o
+tablet, tenemos la lista de browsers que soporta el plugin, esto o tendremos
+que ir actualizando
+
+6-11: estas funciones nos sirven para ver si el agente que mandaron es mobile
+o tablet
+
+12-14: en esta función revisamos si el agente actual es touch, en este caso
+solo estamos revisando si es ios o android
+
+15: en esta función revisamos que no sea Mobile ni tablet entonces suponemos
+que es desktop
+
+Bien ya tenemos nuestra funcionalidad, vamos a hacer unas pequeñas pruebas
+para ver si funciona, para esto usaremos vows donde describiremos nuestros use
+cases, veamos que tiene "test.js":
+
+    
+    
+<pre class="brush: js">
+    /**
+     *
+     * node-bowser testing
+     *
+    */
+    var vows = require('vows'),
+        assert = require('assert'),
+        nbowser = require('../lib/node-bowser.js');
+    
+    exports.test = vows.describe('check user agent').addBatch({
+        'check mobile' : {
+            topic : function(){
+                var req = {headers : {'user-agent' : "iphone"}};
+                return new nbowser(req);
+            },
+            'result its iphone' : function(bowser){
+                assert.isTrue(bowser.isMobile());
+            },
+            'and its not desktop' : function(bowser){
+                assert.isFalse(bowser.isDesktop());
+            }
+        },
+        'check tablet' : {
+            topic : function(){
+                var req = {headers : {'user-agent' : "ipad"}};
+                return new nbowser(req);
+            },
+            'result its tablet' : function(bowser){
+                assert.isTrue(bowser.isTablet());
+            },
+            'and its not desktop' : function(bowser){
+                assert.isFalse(bowser.isDesktop());
+            }
+        },
+        'check touch' : {
+            topic : function(){
+                var req = {headers : {'user-agent' : "iphone"}};
+                return new nbowser(req);
+            },
+            'result its touch' : function(bowser){
+                assert.isTrue(bowser.isTouch());
+            },
+            'and its not desktop' : function(bowser){
+                assert.isFalse(bowser.isDesktop());
+            }
+        },
+        'check android' : {
+            topic : function(){
+                var req = {headers : {'user-agent' : "android"}};
+                return new nbowser(req);
+            },
+            'result its android' : function(bowser){
+                assert.isTrue(bowser.isMobile());
+            },
+            'and its not desktop' : function(bowser){
+                assert.isFalse(bowser.isDesktop());
+            }
+        },
+        'check android tablet' : {
+            topic : function(){
+                var req = {headers : {'user-agent' : "xoom"}};
+                return new nbowser(req);
+            },
+            'result its android tablet' : function(bowser){
+                assert.isTrue(bowser.isTablet());
+            },
+            'and its not desktop' : function(bowser){
+                assert.isFalse(bowser.isDesktop());
+            }
+        }
+    });
+</pre>
+
+Linea 6-8: cargamos los modulos necesarios
+
+10: declaramos la prueba y agregamos los test cases
+
+11-15: creamos un nuevo tópico donde generamos un objeto de tipo request y le
+metemos un agente imaginario de tipo iphone, creamos nuestro objeto node-
+bowser y lo regresamos para que las demás pruebas lo reciban y poder probar
+
+16-22: checamos que el agente sea iphone y ademas que no sea desktop
+
+23…: Todas las demás pruebas son similares solo que mandamos diferentes
+agentes y revisamos otras cosas, cualquier duda con ellas no duden en comentar
+
+Nuestro main nos sirve para correr las pruebas y es bastantes simple:
+
+<pre class="brush: js">
+    #!/usr/bin/env node
+    /**
+     * Test runner
+     *
+    */
+    var nbowser = require('./test');
+    nbowser.test.run();
+</pre>
+
+Aquí solo nos traemos las pruebas que describimos en test y las corremos
+
+El archivo licencia que solo tiene la licencia que vamos a usar en este caso
+AGPL
+
+Y nuestro "Readme.md" que tiene una descripción del modulo que pondremos en
+github, es una buena practica escribir bien un readme para que los usuarios
+sepan utilizar tu modulo y se interesen, [vean el
+readme](https://github.com/pinguxx/node-bowser) en github
+
+Bien ya esta listo, ahora vamos agregando el modulo a npm
+
+sino tienes instalado npm es muy fácil instalarlo, solo corre este comando en
+la consola:
+
+    
+    curl http://npmjs.org/install.sh | sh
+
+Si instalaste node en windows ya viene con npm o revisa mas
+[info](http://npmjs.org/doc/README.html#Super-Easy-Install)
+
+Ya instalado, primero tenemos que agregar nuestro usuario
+
+    
+    
+    npm adduser
+    
+
+Te preguntara nombre, pwd y correo, cualquier problema revisa la
+[documentacion](http://npmjs.org/doc/adduser.html)
+
+Antes de publicarlo, necesitamos ver si funciona y se puede instalar
+localmente sino no tiene caso publicarlo, para hacerlo, en el folder raiz del
+modulo hacemos
+
+    
+    
+    npm install . -g
+    
+
+Si todo sale bien hay que probarlo, entra a otro directorio y lo instalamos
+
+    
+    
+    cd ../some-other-folder
+    npm install ../my-package
+
+Y lo usamos en algún programa node.js para probarlo, si todo sale bien
+entonces lo publicamos, en nuestro folder raíz del modulo corremos en la
+consola:
+
+    
+    npm publish
+
+
+Y listo nuestro modulo esta publicado, ya lo puedes ver en npmjs.org, para
+mas información ve la documentacion para 
+[developers](http://npmjs.org/doc/developers.html)
+
+Esta listo ahora a decirle al mundo de nuestro modulo y a usarlo
