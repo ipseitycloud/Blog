@@ -94,7 +94,7 @@ Nuestro controller para agregar las búsquedas a la db
 y jquery en script.js
 
     
-<pre class="brush: js">
+```javascript
     $('#sf').submit(function(){
         var searchTerm = $('#sf').find('.search').val();
         if (searchTerm){
@@ -125,7 +125,7 @@ y jquery en script.js
         }
         return false;
     });
-</pre>
+```
 
 3. Para poder invitar a mas amigos a la app hacemos algo similar, agregamos un
 link despues del input de la busqueda, cachamos el evento con jquery y
@@ -159,9 +159,9 @@ Agregamos la ruta a nuestro dashboard.js
 
     
 ```javascript
-    /\*\*
-    \* Invitar amigos
-    \*/
+    /**
+    * Invitar amigos
+    */
     app.post('/invite', checkUser, function(req, res){
         var usersl = req.param('users');
         var userl = 0;
