@@ -29,10 +29,10 @@ manejar las nominaciones, creacion, borrado, agregado de usaurio, terminacion
 y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
 
     
-<pre class="brush: js">
-    /\*\*
-     \* Rutas dashboard
-    \*/
+```javscript
+    /**
+     * Rutas dashboard
+    */
     var fb = require('facebook-js'),
         url = 'http://nomination.cloudno.de/';
     
@@ -68,9 +68,9 @@ y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
             next(new Error('nli'));
         }
     }
-    /\*\*
-    \* Dashboard landing
-    \*/
+    /**
+    * Dashboard landing
+    */
     app.get('/dashboard', checkUser, function(req, res){
         log.notice('landed on dashboard user: ' +
         req.session.user.id + ' on: ' + new Date() );
@@ -78,9 +78,9 @@ y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
         res.render('dashboard', { user: req.session.user, error : req.param('error'), type: 'dashboard', invited: invited });
     });
     
-    /\*\*
-    \* lista de amigos de facebook
-    \*/
+    /**
+    * lista de amigos de facebook
+    */
     app.get('/friends', checkUser, function(req, res){
         fb.apiCall('GET', '/me/friends', {access_token: req.session.user.access_token}, function(error, response, body){
             if (error){
@@ -92,9 +92,9 @@ y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
         });
     });
     
-    /\*\*
-    \* lista de mis nominaciones
-    \*/
+    /**
+    * lista de mis nominaciones
+    */
     app.get('/nominations/mine', checkUser, function(req, res){
         nominator.findMyNominations(req.session.user.id,function(err, data){
             if (err) { log.debug('error getting nominations:' + err); res.json(null); return; }
@@ -102,9 +102,9 @@ y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
         });
     });
     
-    /\*\*
-    \* lista de nominaciones donde vote
-    \*/
+    /**
+    * lista de nominaciones donde vote
+    */
     app.get('/nominations/voted', checkUser, function(req, res){
         nominator.findVoted(req.session.user.id,function(err, data){
             if (err) { log.debug('error getting nominations:' + err); res.json(null); return; }
@@ -112,9 +112,9 @@ y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
         });
     });
     
-    /\*\*
-    \* lista de nominaciones donde estoy nominado
-    \*/
+    /**
+    * lista de nominaciones donde estoy nominado
+    */
     app.get('/nominations/appear', checkUser, function(req, res){
         nominator.findNominated(req.session.user.id,function(err, data){
             if (err) { log.debug('error getting nominations:' + err); res.json(null); return; }
@@ -122,9 +122,9 @@ y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
         });
     });
     
-    /\*\*
-    \* regresar nominacion
-    \*/
+    /**
+    * regresar nominacion
+    */
     app.get('/nominations/:id', checkUser, function(req, res){
         nominator.findNomination(req.params.id,function(err, data){
             if (err) { log.debug('error getting nominations:' + err); res.json(null); return; }
@@ -132,9 +132,9 @@ y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
         });
     });
     
-    /\*\*
-    \* Crear nominacion
-    \*/
+    /**
+    * Crear nominacion
+    */
     app.post('/nominations/create', checkUser, function(req, res){
         var nomination = {
             'name' : req.param('name'),
@@ -151,9 +151,9 @@ y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
         });
     });
     
-    /\*\*
-    \* Borrar nominacion
-    \*/
+    /**
+    * Borrar nominacion
+    */
     app.post('/nominations/erase', checkUser, function(req, res){
         //TODO: erase nomination
         var id = req.param('id');
@@ -164,9 +164,9 @@ y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
         });
     });
     
-    /\*\*
-    \* Votar en nominacion
-    \*/
+    /**
+    * Votar en nominacion
+    */
     app.post('/nominations/vote', checkUser, function(req, res){
         //TODO: vote nomination, write in own wall, try to write in other user wall
         var voterid = req.session.user.id;
@@ -216,9 +216,9 @@ y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
         });
     });
     
-    /\*\*
-    \* Agregar usuario a nominacion
-    \*/
+    /**
+    * Agregar usuario a nominacion
+    */
     app.post('/nominations/adduser', checkUser, function(req, res){
         var users = req.param('users');
         var id = req.param('id');
@@ -264,9 +264,9 @@ y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
         });
     });
     
-    /\*\*
-    \* Borrar usuario de nominacion
-    \*/
+    /**
+    * Borrar usuario de nominacion
+    */
     app.post('/nominations/eraseuser', checkUser, function(req, res){
         //just erased, dont notice anyone ![:(](http://udiweb.com.mx/wp-includes/images/smilies/icon_sad.gif)
         var user = req.param('user');
@@ -285,9 +285,9 @@ y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
         });
     });
     
-    /\*\*
-    \* Terminar nominacion
-    \*/
+    /**
+    * Terminar nominacion
+    */
     app.post('/nominations/end', checkUser, function(req, res){
         //TODO: end the nomination and declare a winner
         var id = req.param('id');
@@ -367,7 +367,7 @@ y… yap, todo esto lo pondremos en dashboard.js, nos quedara algo asi:
     });
     
     };
-</pre>
+```
 
 Primero vamos viendo nuestro middleware y una pequeña funcion de ayuda
 
