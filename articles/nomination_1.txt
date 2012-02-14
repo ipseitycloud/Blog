@@ -4,6 +4,10 @@
 	"author" : "Mrpix, pinguxx"
 }
 
+Este post es parte de una serie sobre como crear una aplicacion con node.js y
+express para facebook
+
+
 Empezare a publicar algunas cosas sobre el desarrollo con node.js, mientras
 iremos desarrollando una aplicacion que sera publica, asi que podran ayudarme,
 regañarme, guiarme, sus aportaciones son valiosas
@@ -16,9 +20,7 @@ solo ejemplos
 En el proximo post pondre que haremos, que herramientas vamos a usar y la idea
 en general.
 
-Por lo pronto install node.js
-
-[http://nodejs.org/](http://nodejs.org/)
+Por lo pronto instalar [node.js](http://nodejs.org/)
 
 Ya sea que se bajen el msi para windows o el pkg para mac, o si son linuxeros
 habra que compilar

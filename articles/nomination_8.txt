@@ -4,6 +4,17 @@
     "author" : "Mrpix, pinguxx"
 }
 
+Este post es parte de una serie sobre como crear una aplicacion con node.js y
+express para facebook
+
+[Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+[Parte 2](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-2/)
+[Parte 3](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js-parte-3-–-actualizando-app.js-y-logueo/)
+[Parte 4](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-4-–-modelos/)
+[Parte 5](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-5---pruebas/)
+[Parte 6](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-6---internacionalizacion/)
+[Parte 7](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-7---conectarse-a-facebook/)
+
 Vamos viendo el ui, primero lo "mockie" en cacoo, y mas o menos esta es la
 idea
 
@@ -291,19 +302,13 @@ y lo deseleccionamos despues traemos su sibling input y lo seleccionamos
 
 Nos queda algo asi:
 
-[![](http://ipseitycloud.com/wordpress/wp-content/uploads/2012/01
-/nomination_dashboard-300x181.png)](http://ipseitycloud.com/wordpress/wp-
-content/uploads/2012/01/nomination_dashboard.png)
+[![](http://ipseitycloud.com/wordpress/wp-content/uploads/2012/01/nomination_dashboard-300x181.png)](http://ipseitycloud.com/wordpress/wp-content/uploads/2012/01/nomination_dashboard.png)
 
 y los dialogos
 
-[![](http://ipseitycloud.com/wordpress/wp-content/uploads/2012/01
-/nomination_add_friends-300x206.png)](http://ipseitycloud.com/wordpress/wp-
-content/uploads/2012/01/nomination_add_friends.png)
+[![](http://ipseitycloud.com/wordpress/wp-content/uploads/2012/01/nomination_add_friends-300x206.png)](http://ipseitycloud.com/wordpress/wp-content/uploads/2012/01/nomination_add_friends.png)
 
-[![](http://ipseitycloud.com/wordpress/wp-content/uploads/2012/01
-/nomination_new_nomination-300x200.png)](http://ipseitycloud.com/wordpress/wp-
-content/uploads/2012/01/nomination_new_nomination.png)
+[![](http://ipseitycloud.com/wordpress/wp-content/uploads/2012/01/nomination_new_nomination-300x200.png)](http://ipseitycloud.com/wordpress/wp-content/uploads/2012/01/nomination_new_nomination.png)
 
 El css aparte de lo de html5boilerplate es el siguiente:
 
@@ -492,7 +497,6 @@ hecha la mano o si alguien quiere participar, es bienvenido
 
 Para ver todo el codigo, revisen el github
 
-[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-
-mexico/nomi-nation)
+[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-mexico/nomi-nation)
 
 Saludos

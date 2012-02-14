@@ -4,6 +4,19 @@
     "author" : "Mrpix, pinguxx"
 }
 
+Este post es parte de una serie sobre como crear una aplicacion con node.js y
+express para facebook
+
+[Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+[Parte 2](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-2/)
+[Parte 3](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js-parte-3-–-actualizando-app.js-y-logueo/)
+[Parte 4](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-4-–-modelos/)
+[Parte 5](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-5---pruebas/)
+[Parte 6](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-6---internacionalizacion/)
+[Parte 7](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-7---conectarse-a-facebook/)
+[Parte 8](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-8---ui/)
+[Parte 9](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-9---rutas-y-ajax/)
+
 Vamos haciendo ya una versión beta con la mayor funcionalidad que podamos,
 integrando algún tipo de búsqueda, una forma de invitar amigos, un logo y
 arreglamos los bugs que nos hayan reportado los usuarios que ya la probaron…

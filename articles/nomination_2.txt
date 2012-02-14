@@ -4,6 +4,11 @@
 	"author" : "Mrpix, pinguxx"
 }
 
+Este post es parte de una serie sobre como crear una aplicacion con node.js y
+express para facebook
+
+[Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+
 Bueno ahora que ya tenemos nuestro node.js y npm listo y funcionando vamos
 empezando a instalar lo necesario para la app
 

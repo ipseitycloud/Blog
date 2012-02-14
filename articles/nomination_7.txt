@@ -4,6 +4,16 @@
     "author" : "Mrpix, pinguxx"
 }
 
+Este post es parte de una serie sobre como crear una aplicacion con node.js y
+express para facebook
+
+[Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+[Parte 2](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-2/)
+[Parte 3](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js-parte-3-–-actualizando-app.js-y-logueo/)
+[Parte 4](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-4-–-modelos/)
+[Parte 5](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-5---pruebas/)
+[Parte 6](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-6---internacionalizacion/)
+
 Vamos conectandonos a facebook para traer informacion del usuario y guardar su
 access token para futuros queries a facebook mientras dura la sesion, no
 guardaremos mas que user id y name.

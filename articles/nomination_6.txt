@@ -4,6 +4,15 @@
     "author" : "Mrpix, pinguxx"
 }
 
+Este post es parte de una serie sobre como crear una aplicacion con node.js y
+express para facebook
+
+[Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+[Parte 2](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-2/)
+[Parte 3](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js-parte-3-–-actualizando-app.js-y-logueo/)
+[Parte 4](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-4-–-modelos/)
+[Parte 5](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-5---pruebas/)
+
 Vamos agregándole de una vez internacionalización a la app para que no nos
 queden strings sin traducir despues, al habilitarlo lo que hacemos es crear
 una lista de strings en un archivo que cargamos a la aplicacion, dependiendo
@@ -208,8 +217,7 @@ varios idiomas.
 
 [http://jamuhl.github.com/i18next/](http://jamuhl.github.com/i18next/)
 
-[https://github.com/jamuhl/i18next-node](https://github.com/jamuhl/i18next-
-node)
+[https://github.com/jamuhl/i18next-node](https://github.com/jamuhl/i18next-node)
 
 Ah por cierto, no olviden de actualizar su test para la ruta index, porque ya
 cambiamos el title de "Express" a "Nomi-nation" sino va a fallar.

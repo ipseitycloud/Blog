@@ -4,6 +4,12 @@
 	"author" : "Mrpix, pinguxx"
 }
 
+Este post es parte de una serie sobre como crear una aplicacion con node.js y
+express para facebook
+
+[Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+[Parte 2](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-2/)
+
 Regresando un poco a la pagina principal, preferi de una vez separar las rutas
 de la pagina principal para no hacer un mega script ademas de que agregaremos
 logueo simple con el modulo log; empezamos agregando el modulo log a nuestra
@@ -98,7 +104,6 @@ hacer logueo
 
 Pueden ver el codigo en:
 
-[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-
-mexico/nomi-nation)
+[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-mexico/nomi-nation)
 
 Saludos

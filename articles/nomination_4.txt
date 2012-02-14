@@ -4,6 +4,13 @@
 	"author" : "Mrpix, pinguxx"
 }
 
+Este post es parte de una serie sobre como crear una aplicacion con node.js y
+express para facebook
+
+[Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+[Parte 2](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-2/)
+[Parte 3](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js-parte-3-–-actualizando-app.js-y-logueo/)
+
 Para nuestra aplicacion usaremos el modulo de mongoose que ya tenemos
 instalado, el modelo es mas o menos así:
 
@@ -299,7 +306,6 @@ rutas
 
 Pueden ver el codigo en:
 
-[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-
-mexico/nomi-nation)
+[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-mexico/nomi-nation)
 
 Saludos
