@@ -70,13 +70,13 @@ Abrimos nuestro navegador en la ruta localhost:3000 y veremos nuestra pagina
 inicial, vamos a revisar por partes el script app.js
 
 <pre class="brush: js">
-```
+```js
     /**
      * Module dependencies.
      */
-    
+```
     var express = require('express');
-    ```
+
     var app = module.exports = express.createServer();
     
     // Configuration
