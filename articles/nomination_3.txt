@@ -18,7 +18,7 @@ para que quede:
 
     
     
-    
+<pre class="brush: js">    
     {
      "name": "nomi-nation"
      , "version": "0.0.1"
@@ -32,7 +32,7 @@ para que quede:
      , "log" : "1.2.0"
      }
     }
-    
+</pre>    
 
 y despues desde el folder root de la app hacemos
 
@@ -105,6 +105,3 @@ hacer logueo
 Pueden ver el codigo en:
 
 [https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-
-mexico/nomi-nation)
-
-Saludos
