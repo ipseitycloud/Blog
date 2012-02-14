@@ -1,6 +1,6 @@
 {
-    "title" : "Nodejs parte 4 – modelos",
-    "date" : "01/14/2012",
+    "title" : "Nodejs parte 5 - pruebas",
+    "date" : "01/15/2012",
     "author" : "Mrpix, pinguxx"
 }
 

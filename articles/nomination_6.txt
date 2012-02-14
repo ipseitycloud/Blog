@@ -1,0 +1,217 @@
+{
+    "title" : "Nodejs parte 6 - internacionalizacion",
+    "date" : "01/16/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Vamos agregándole de una vez internacionalización a la app para que no nos
+queden strings sin traducir despues, al habilitarlo lo que hacemos es crear
+una lista de strings en un archivo que cargamos a la aplicacion, dependiendo
+del idioma que el usuario tenga configurado en su navegador es el archivo de
+strings que cargara la app y asi mostramos la app en diferentes idiomas.
+
+Para empezar vamos agregando el modulo que nos permite hacer eso en nuestro
+package.json i18next:
+
+    
+<pre class="brush: js">
+    {
+        "name": "nomi-nation"
+      , "version": "0.0.1"
+      , "private": true
+      , "dependencies": {
+          "express": "2.5.2"
+        , "express-messages" : ">= 0.0.2"
+        , "facebook-js" : "1.0.1"
+        , "jade": ">= 0.0.1"
+        , "log" : "1.2.0"
+        , "mongoose" : "2.4.8"
+        , "vows" : "0.6.1"
+        , "zombie" : "0.12.9"
+        , "jsdom" : "0.2.10"
+        , "i18next" : "0.5.1"
+      }
+    }
+</pre>
+
+y hacemos un npm install -d para que instale las dependencias
+
+Creamos un directorio que se llame "locales" y adentro de ese otros mas que
+sean en-US, es-MX, en, es y todos los idiomas que quieran soportar en su
+formato iso, dentro de esas carpetas pongan sus archivos de strings en este
+caso usaremos uno que le llamaremos translation.json, hay que crear el mismo
+archivo en todas las carpetas, el funcionamiento de i18next es que buscara el
+codigo igual como lo mando la pagina osea primero seria en-us, sino lo
+encuentra buscara en, sino el default y si de plano ninguno usara el string
+que mandaste de identificador como output, nuestro archivo de translation
+quedara mas o menos asi:
+
+    
+<pre class="brush: js">
+    {
+        "app": {
+            "name": "Nomi-nation",
+             "welcome" : "Welcome to $t(app.name)"
+        },
+        "creator": {
+            "name": "MrPix"
+        }
+    }
+</pre>
+
+y en español asi:
+
+    
+<pre class="brush: js">
+    {
+        "app": {
+            "name": "Nomi-nation",
+            "welcome" : "Bienvenido a $t(app.name)"
+        },
+        "creator": {
+            "name": "MrPix"
+        }
+    }
+</pre>
+
+Es bastante sencillo un documento json con sus llaves y valores en dif
+idiomas, lo mas interesante seria en la linea 4 de los 2 archivos que estamos
+anidando el nombre de la app dentro de welcome para no escribirlo 2 veces.
+
+Bien vamos agregando el modulo a nuestra app, agregamos el modulo en app.js de
+la sig manera en la linea 8 mas o menos:
+
+    
+    i18next = require('i18next')
+
+Despues de nuestras variables iniciamos i18next asi:
+
+    
+<pre class="brush: js">
+    i18next.init({
+        ns: { namespaces: ['translation'], defaultNs: 'translation'},
+        resSetPath: 'locales/__lng__/new.__ns__.json',
+        saveMissing: true
+    });
+</pre>
+
+en namspaces le decimos el o los archivos a cargar si ven es un array y le
+agregamos algun default, el resSetPath sirve para setear el path del idioma de
+manera dinamica los "__" indican una variable y que guarde las llaves que no
+existan si llega a pasar.
+
+Despues en nuestro bloque de app.configure agregamos un helper para las vistas
+y poder usarlos sin problemas en nuestros templates de jade
+
+    
+    app.use(i18next.handle);
+
+E iniciamos el helper justo despues de nuestro bloque de app.configure asi:
+
+    
+<pre class="brush: js">
+    i18next.registerAppHelper(app)
+        .serveClientScript(app)
+        .serveDynamicResources(app)
+        .serveMissingKeyRoute(app);
+</pre>
+
+Eso es todo por la parte de app.js, vamos a los templates, primero el
+layout.jade quedaria asi:
+
+    
+<pre class="brush: js">
+    !!! 5
+    html(lang="en")
+      head
+        title= t('app.name')
+        link(rel='stylesheet', href='/stylesheets/style.css')
+      body!= body
+      script(src="http://code.jquery.com/jquery-1.7.1.min.js", type="text/javascript")
+      script(src='i18next/i18next.js', type='text/javascript')
+      script(src='javascripts/script.js', type='text/javascript')
+</pre>
+
+Si se fijan en el titulo estamos cargando uno de los keys de nuestro json
+"app.name", para accesar a los valores de nuestros archivos usamos el t() y le
+pasamos el string con la llave que queremos, despues cargamos i18next que lo
+manda el server de node.js por y al final nuestro script.js para inicializar
+del lado del cliente i18next, tambien cargamos jquery que es necesario.
+
+index.jade queda asi:
+
+    
+<pre class="brush: js">
+    h1= t('app.name')
+    p #{t('app.welcome')}
+    .by by: #{t('creator.name')}
+</pre>
+
+Aquí estamos cargando los strings de nuestros archivos, vamos viendo como
+iniciar nuestro i18next en el cliente, creamos primero un archivo llamado
+script.js dentro de nuestro folder de public/javascripts/ y agregamos lo
+siguiente:
+
+    
+<pre class="brush: js">
+    var options = {
+        ns: { namespaces: ['translation'], defaultNs: 'translation'},
+        useLocalStorage: false,
+        resGetPath: 'locales/resources.json?lng=__lng__&ns=__ns__',
+        dynamicLoad: true,
+        sendMissing: true
+    };
+    $.i18n.init(options, function() {
+        //TODO: add more text
+    });
+</pre>
+
+Primero creamos un objecto con las opciones a usar, primero le decimos que
+archivos cargue, quitamos el localstorage, agregamos lo del path dinámico y
+aceptamos que envié los keys que no se encuentran y al final cargamos el i18n
+con jquery, la funcion de callback que tenemos ahi la podriamos usar para con
+jquery meter texto asi:
+
+    
+    $('#appname').text($.t('app.name'));
+
+o bien ya despues de iniciarlo podemos usarlo en cualquier parte con
+
+    
+    $.t()
+
+o bien podemos usar la funcion de jquery, algo asi:
+
+    
+<pre class="brush: js">
+    // el archivo con los strings
+    "nav": {
+        "home": "home",
+        "1": "link1",
+        "2": "link2"
+    }
+    
+    // el html
+    <ul>
+        <li><a href="#" data-i18n="nav.home">home</a></li>
+        <li><a href="#" data-i18n="nav.1">link1</a></li>
+        <li><a href="#" data-i18n="nav.2">link2</a></li>
+    </ul>
+    
+    // traduce todos los elementos que tengan el atributo "data-i18n"
+    $('.nav').i18n();
+</pre>
+
+Listo ya tenemos lista nuestra aplicacion y en lugar de poner los strings
+directamente de nuestra ui, los cargamos con i18next y los presentaremos en
+varios idiomas.
+
+[http://jamuhl.github.com/i18next/](http://jamuhl.github.com/i18next/)
+
+[https://github.com/jamuhl/i18next-node](https://github.com/jamuhl/i18next-
+node)
+
+Ah por cierto, no olviden de actualizar su test para la ruta index, porque ya
+cambiamos el title de "Express" a "Nomi-nation" sino va a fallar.
+
+Saludos
