@@ -172,7 +172,7 @@ Agregamos la ruta a nuestro dashboard.js
                 if (error) { log.debug('error posting on voted user'); return; }
             };
             for (var i=0;i<userl;i++){
-                fb.apiCall(
+                | fb.apiCall(
                     'POST',
                     '/'+usersl[i]._id+'/feed',
                     {
@@ -188,7 +188,7 @@ Agregamos la ruta a nuestro dashboard.js
             onerror = function (error) {
                 if (error) { log.debug('error posting on voted user'); return; }
             };
-            fb.apiCall(
+            | fb.apiCall(
                 'POST',
                 '/'+usersl._id+'/feed',
                 {
