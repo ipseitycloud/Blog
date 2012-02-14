@@ -15,10 +15,10 @@ bowser, la estructura de archivos/folders quedara algo así:
 node-bowser
 
 * lib
-** node-bowser.js
+    * node-bowser.js
 * test
-** main.js
-** test.js
+    * main.js
+    * test.js
 * index.js
 * license
 * package.json
@@ -115,11 +115,11 @@ cases, veamos que tiene "test.js":
     
     
 <pre class="brush: js">
-    /**
-     *
-     * node-bowser testing
-     *
-    */
+    /\*\*
+     \*
+     \* node-bowser testing
+     \*
+    \*/
     var vows = require('vows'),
         assert = require('assert'),
         nbowser = require('../lib/node-bowser.js');
@@ -205,10 +205,10 @@ Nuestro main nos sirve para correr las pruebas y es bastantes simple:
 
 <pre class="brush: js">
     #!/usr/bin/env node
-    /**
-     * Test runner
-     *
-    */
+    /\*\*
+     \* Test runner
+     \*
+    \*/
     var nbowser = require('./test');
     nbowser.test.run();
 </pre>
