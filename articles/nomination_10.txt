@@ -8,13 +8,21 @@ Este post es parte de una serie sobre como crear una aplicacion con node.js y
 express para facebook
 
 [Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+
 [Parte 2](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-2/)
+
 [Parte 3](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js-parte-3-–-actualizando-app.js-y-logueo/)
+
 [Parte 4](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-4-–-modelos/)
+
 [Parte 5](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-5---pruebas/)
+
 [Parte 6](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-6---internacionalizacion/)
+
 [Parte 7](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-7---conectarse-a-facebook/)
+
 [Parte 8](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-8---ui/)
+
 [Parte 9](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-9---rutas-y-ajax/)
 
 Vamos haciendo ya una versión beta con la mayor funcionalidad que podamos,
@@ -152,48 +160,48 @@ Agregamos la ruta a nuestro dashboard.js
     
 <pre class="brush: js">
     /\*\*
-         \* Invitar amigos
-         \*/
-        app.post('/invite', checkUser, function(req, res){
-            var usersl = req.param('users');
-            var userl = 0;
-            var onerror;
-            if (usersl instanceof Array){
-                userl = usersl.length;
-                onerror = function (error) {
-                            if (error) { log.debug('error posting on voted user'); return; }
-                        };
-                for (var i=0;i<userl;i++){
-                    fb.apiCall(
-                        'POST',
-                        '/'+usersl[i]._id+'/feed',
-                        {
-                            access_token: req.session.user.access_token,
-                            message: app._locals.t('dashboard.invited'),
-                            name: app._locals.t('dashboard.nominate'),
-                            link: url
-                        },
-                        onerror
-                    );
-                }
-            }else{
-                onerror = function (error) {
+     \* Invitar amigos
+     \*/
+    app.post('/invite', checkUser, function(req, res){
+        var usersl = req.param('users');
+        var userl = 0;
+        var onerror;
+        if (usersl instanceof Array){
+            userl = usersl.length;
+            onerror = function (error) {
                         if (error) { log.debug('error posting on voted user'); return; }
                     };
+            for (var i=0;i<userl;i++){
                 fb.apiCall(
                     'POST',
-                    '/'+usersl._id+'/feed',
+                    '/'+usersl[i]._id+'/feed',
                     {
-                            access_token: req.session.user.access_token,
-                            message: app._locals.t('dashboard.invited'),
-                            name: app._locals.t('dashboard.nominate'),
-                            link: url
+                        access_token: req.session.user.access_token,
+                        message: app._locals.t('dashboard.invited'),
+                        name: app._locals.t('dashboard.nominate'),
+                        link: url
                     },
                     onerror
                 );
             }
-            res.json(true);
-        });
+        }else{
+            onerror = function (error) {
+                    if (error) { log.debug('error posting on voted user'); return; }
+                };
+            fb.apiCall(
+                'POST',
+                '/'+usersl._id+'/feed',
+                {
+                        access_token: req.session.user.access_token,
+                        message: app._locals.t('dashboard.invited'),
+                        name: app._locals.t('dashboard.nominate'),
+                        link: url
+                },
+                onerror
+            );
+        }
+        res.json(true);
+    });
 </pre>
 
 Y al final nuestro codigo jquery
@@ -201,54 +209,54 @@ Y al final nuestro codigo jquery
     
 <pre class="brush: js">
     //creamos el dialog de agregar usuarios
-        $( "#dialog-invite" ).dialog({
-            autoOpen: false,
-            height: 300,
-        	width: 450,
-    		modal: true,
-    		buttons: {
-    			"Invite friend(s)": function() {
-                    $('.loading').show();
-                    var dialog = $(this);
-                    var users = [];
-                    var userp;
-                    $('#selectablei').find('.ui-selected').each(function(key, value){
-                        users.push({
-                            "_id" : $(value).attr('id'),
-                            "name" : $(value).text()
-                        });
+    $( "#dialog-invite" ).dialog({
+        autoOpen: false,
+        height: 300,
+    	width: 450,
+		modal: true,
+		buttons: {
+			"Invite friend(s)": function() {
+                $('.loading').show();
+                var dialog = $(this);
+                var users = [];
+                var userp;
+                $('#selectablei').find('.ui-selected').each(function(key, value){
+                    users.push({
+                        "_id" : $(value).attr('id'),
+                        "name" : $(value).text()
                     });
-                    var ul = users.length;
-                    if (ul > 0 && ul <= 1){
-                        userp = users[0];
-                    }else{
-                        userp = users;
-                    }
-                    $.post("/invite", { users: userp },
-                        function(data) {
-                            if (data){
-                                showMsg('dashboard.warning', 'dashboard.invited');
-                                dialog.dialog( "close" );
-                            }else{
-                                dialog.dialog( "close" );
-                                showMsg('dashboard.error', 'dashboard.warning_invited');
-                            }
-                            $('.loading').hide();
+                });
+                var ul = users.length;
+                if (ul > 0 && ul <= 1){
+                    userp = users[0];
+                }else{
+                    userp = users;
+                }
+                $.post("/invite", { users: userp },
+                    function(data) {
+                        if (data){
+                            showMsg('dashboard.warning', 'dashboard.invited');
+                            dialog.dialog( "close" );
+                        }else{
+                            dialog.dialog( "close" );
+                            showMsg('dashboard.error', 'dashboard.warning_invited');
                         }
-                    ).error(function() { $('.loading').hide(); showMsg('dashboard.warning', 'dashboard.warning_invited'); });
-    			},
-    			Cancel: function() {
-    				$( this ).dialog( "close" );
-    			}
-    		},
-    		close: function() {
-    			//TODO:
-    		}
-    	});
+                        $('.loading').hide();
+                    }
+                ).error(function() { $('.loading').hide(); showMsg('dashboard.warning', 'dashboard.warning_invited'); });
+			},
+			Cancel: function() {
+				$( this ).dialog( "close" );
+			}
+		},
+		close: function() {
+			//TODO:
+		}
+	});
     
     $('.invite').click(function(){
-            $( "#dialog-invite" ).dialog( "open" );
-        });
+        $( "#dialog-invite" ).dialog( "open" );
+    });
 </pre>
 
 4. Agregamos todos los strings faltantes a nuestros archivos de translations
