@@ -1,6 +1,6 @@
 {
     "title" : "Desarrollo con node.js parte 3 – actualizando app.js y logueo",
-	"date" : "13/01/2012",
+	"date" : "01/13/2012",
 	"author" : "Mrpix, pinguxx"
 }
 
