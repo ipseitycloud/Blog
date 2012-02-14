@@ -11,8 +11,8 @@ app
 
 En nuestro package.json agregamos:
 
-<pre class="brush: js">    
-    , "log" : "1.2.0"
+<pre class="brush: js">
+, "log" : "1.2.0"
 </pre>
 
 para que quede:

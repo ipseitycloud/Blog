@@ -19,7 +19,7 @@ veamos el codigo de los modelos con mongoose
 
     
     
-<pre class="brush: js">    
+<pre class="brush: js">
     function defineModels(mongoose, fn) {
      var Schema = mongoose.Schema,
      Nomination, User;
@@ -109,7 +109,7 @@ controlador:
 
     
     
-<pre class="brush: js">    
+<pre class="brush: js">
     var mongoose = require('mongoose'),
         models = require('../models/nomination.js'),
         Nomination, db;

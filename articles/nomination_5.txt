@@ -1,0 +1,348 @@
+{
+    "title" : "Nodejs parte 4 – modelos",
+    "date" : "01/14/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Para no ir haciendo codigo como enajenados sin saber si funciona o no… vamos a
+empezar a probar lo que estamos haciendo y como buena practica intentar hacer
+tdd, osea hacer las pruebas antes del codigo, para esta ocasion tendremos que
+instalar los modulos para probar, nos iremos por vows que tiene una manera muy
+interesante de describir las pruebas, zombie para navegar sin navegador
+![:)](http://udiweb.com.mx/wp-includes/images/smilies/icon_smile.gif) y jsdom
+para manipular el dom una vez q cargaron las paginas, a darle atomos…
+
+primero actualizamos nuestro package.json agregando vows, zombie y jsdom para
+que quede asi:
+
+    
+<pre class="brush: js">
+    {
+        "name": "nomi-nation"
+      , "version": "0.0.1"
+      , "private": true
+      , "dependencies": {
+          "express": "2.5.2"
+        , "express-messages" : ">= 0.0.2"
+        , "facebook-js" : "1.0.1"
+        , "jade": ">= 0.0.1"
+        , "log" : "1.2.0"
+        , "mongoose" : "2.4.8"
+        , "vows" : "0.6.1"
+        , "zombie" : "0.12.9"
+        , "jsdom" : "0.2.10"
+      }
+    }
+</pre>    
+
+e instalamos todo con
+
+    
+    npm install -d
+
+Creamos un folder llamado test o como quieran y creamos 3 archivos main.js,
+controllers.js, routes.js.
+
+Vamos a probar primero el controller, imaginemos que tenemos esta estrucutra
+en nuestra db:
+
+3 nominaciones, test1 owner "1″, test2 owner "2″ y test3 owner "3″, facil no,
+entonces vamos probando nuestras busquedas con vows, nuestro archivo
+controllers.js quedaria asi:
+
+    
+<pre class="brush: js">
+    /**
+     *
+     * Controller testing
+     *
+    */
+    var vows = require('vows'),
+        assert = require('assert'),
+        nominator = require('../controllers/nominator.js');
+    
+    exports.findN = vows.describe('find nominations').addBatch({
+        'when finding where 2 voted' : {
+            topic : function(){
+                nominator.findVoted(2,this.callback);
+            },
+            'result its only one nomination' : function(err, docs){
+                if (err) { console.log(err); return; }
+                assert.lengthOf(docs, 1);
+            },
+            'and its test2' : function(err, docs){
+                if (err) { console.log(err); return; }
+                assert.equal('test2', docs[0].name);
+            }
+        },
+        'when finding where 1 voted' : {
+            topic : function(){
+                nominator.findVoted(1,this.callback);
+            },
+            'result is 3 nominations' : function(err, docs){
+                if (err) { console.log(err); return; }
+                assert.lengthOf(docs, 3);
+            },
+            'and are test1 2 and 3' : function(err, docs){
+                if (err) { console.log(err); return; }
+                for (var i=0;i                assert.equal('test'+(i+1), docs[i].name);
+                }
+            }
+        },
+        'when finding where 8 voted' : {
+            topic : function(){
+                nominator.findVoted(8,this.callback);
+            },
+            'result is 0' : function(err, docs){
+                if (err) { console.log(err); return; }
+                assert.lengthOf(docs, 0);
+            }
+        }
+    }).addBatch({
+        'when finding 1 nominations' : {
+            topic : function(){
+                nominator.findMyNominations(1,this.callback);
+            },
+            'result its only one nomination' : function(err, docs){
+                if (err) { console.log(err); return; }
+                assert.lengthOf(docs, 1);
+            },
+            'and its test1' : function(err, docs){
+                if (err) { console.log(err); return; }
+                assert.equal('test1', docs[0].name);
+            }
+        },
+        'when finding 9 nominations' : {
+            topic : function(){
+                nominator.findMyNominations(9,this.callback);
+            },
+            'result is 0' : function(err, docs){
+                if (err) { console.log(err); return; }
+                assert.lengthOf(docs, 0);
+            }
+        }
+    }).addBatch({
+        'when finding where 8 is nominated' : {
+            topic : function(){
+                nominator.findNominated(8,this.callback);
+            },
+            'result its 3 nominations' : function(err, docs){
+                if (err) { console.log(err); return; }
+                assert.lengthOf(docs, 3);
+            },
+            'and its test1, 2 and 3' : function(err, docs){
+                if (err) { console.log(err); return; }
+                for (var i=0;i                assert.equal('test'+(i+1), docs[i].name);
+                }
+            }
+        },
+        'when finding where 1 is nominated' : {
+            topic : function(){
+                nominator.findNominated(1,this.callback);
+            },
+            'result is 0 ' : function(err, docs){
+                if (err) { console.log(err); return; }
+                assert.lengthOf(docs, 0);
+            }
+        }
+    });
+</pre>
+
+Linea 1-8: Cargamos los modulos y tambien nuestro controller nominator.js
+
+10: creamos la funcion findN mientras la exportamos con exports, y empezamos
+describiendo la prueba que en este caso se llama 'find nominations' y
+agregamos un batch que seria como un bonche de pruebas a correr
+
+11-14: la primera prueba se llama "when finding where 2 voted" eso quiere
+decir que vamos a buscar las nominaciones donde el usuario con el id 2 ah
+votado, creamos el topic que es como la entrada a la prueba donde mandamos a
+llamar el controller con la funcion findVoted, le mandamos el id a buscar y
+aqui algo importante, usamos el callback local con this.callback esto quiere
+decir que va a regresar los resultados a todos las pruebas siguientes de
+manera asyncrona…
+
+15-18: nuestra siguiente prueba es: 'result its only one nomination' osea el
+resultado es solo una nominacion y para revisarlo primero checamos que no haya
+regresado error la funcion sino hacemos un assert.lengthOf de docs que es la
+lista de docs q regresa la funcion y la comparamos con lo que esperamos que en
+este caso es 1, la lista de assert que cargamos es parte del modulo de vows,
+es bastante completa pueden checarla en su pagina
+
+19-22: la prueba siguiente tambien toma los resultados de la funcion findVoted
+y en este caso checamos si efectivamente la nominacion es test 2 ques la unica
+en la que el usuario 2 voto, la prueba se llama 'and its test2′ y de la misma
+forma checamos si no hay error y sino hay hacemos un assert del nombre de la
+nominacion con doc[0].name a test2
+
+Resto de lineas: bueno pues es practicamente lo mismo una y otra vez solamente
+checando diferentes funciones que creamos en nuestro controller y haciendo dif
+asserts, metiendolos a batch para que los vaya corriendo, chequenlas todas y
+si salen dudas no duden en preguntarme.
+
+El codigo que use para agregar usuarios y nominaciones es mas o menos asi:
+
+    
+    
+<pre class="brush: js">
+    var nomination = {
+        'name' : "test3",
+        'owner' : "3", //who is the owner of the nomination
+        'endDate' : new Date(), //when this nomination is going to end
+        'category' : "cat1",
+        'sub_cat' : "sub1",
+        'active' : true //nomination finished
+    };
+    nominator.createNomination(nomination, function(err, doc){
+        if (err) { console.log(err); return; }
+        var users = [];
+        for(var i = 4; i<12; i++ ){
+            users.push({
+                "_id" : i,
+                "name" : i,
+                "votes" : 0
+            });
+        }
+        nominator.addUser(doc, users, function(err){
+            if (err) {  console.log(err); return; }
+            var user = {"_id":9, "name":9, "votes":0 };
+            nominator.eraseUser(doc, user, function(err){
+                if (err) {  console.log(err); return; }
+                nominator.addUser(doc, user, function(err){
+                    if (err) {  console.log(err); return; }
+                });
+                nominator.addUser(doc, {"_id":19, "name":19, "votes":0 }, function(err){
+                    if (err) {  console.log(err); return; }
+                });
+            });
+        });
+    });
+</pre>
+
+En este caso creamos un objeto nomination que lo mandamos a create nomination,
+como callback creamos un bonche de usuarios que metemos con adduser y despues
+borramos y metemos mas usuarios nomas por diversion.
+
+Para agregar votos hacemos algo como esto:
+
+    
+<pre class="brush: js">
+    nominator.findMyNominations(1, function(err, doc){
+        if (err) { console.log(err); return; }
+        for (var i=2;i<5;i++){
+            nominator.vote(doc[0], 1, i, function(err, doc){
+                if (err) {  console.log(err); return; }
+            });
+        }
+    });
+</pre>
+
+Buscamos las nominaciones de "1″ y como callback le metemos votantes.
+
+Ahi les queda de tarea hacer esto como pruebas en vows
+
+Bien ahora vamos a hacer una pequeña prueba para ver si nuestra ruta "/" esta
+jalando como debe, zombie al rescate.
+
+Agregamos el codigo a nuestro archivo routes.js para que quede algo como esto:
+
+    
+    
+<pre class="brush: js">
+    /**
+     *
+     * Test index route
+    */
+    var vows = require('vows'),
+        assert = require('assert'),
+        zombie = require('zombie'),
+        jsdom = require('jsdom');
+    
+    exports.index = vows.describe('Visiting index').addBatch({
+        'when hitting the page': {
+            topic: function(){
+                zombie.visit('http://localhost:3000',this.callback);
+            },
+            'we got the page': function(err, browser, status) {
+                if (err){
+                    throw(err.message);
+                }
+                assert.equal(status, 200);
+            },
+            'and try to get the title' : {
+                topic : function(browser){
+                    var vow = this;
+                    jsdom.env({
+                        html: browser.response[2],
+                        scripts: [
+                            'http://code.jquery.com/jquery-1.5.min.js'
+                        ],
+                        done: vow.callback
+                    });
+                },
+                'the title is Express' : function(errors, window) {
+                    //console.log(errors);
+                    if (errors){
+                        throw(errors);
+                    }else{
+                        var $ = window.$;
+                        assert.equal('Express', $('title').html());
+                    }
+                }
+            }
+        }
+    });
+</pre>
+
+Linea 1-8: cargamos todos los modulos necesario
+
+10: creamos nuestra prueba 'visiting index' y agregamos el batch de pruebas
+
+11-14: creamos nuestra prueba que se llama "when hitting the page" y nuestro
+topic que en este caso es zombie visitando nuestra pagina e igual mandamos a
+llamar el callback local que se va a las pruebas siguientes.
+
+15-20: 'we got the page' nuestra siguiente prueba toma los argumentos que
+mando zombie error, browser y el status http, primero checamos por algun error
+sino checamos el status de la respuesta que sea 200
+
+21-22: 'and try to get the title' en esta prueba anidamos otro topico que en
+este caso tambien toma la respuesta de zombie nomas sin el error, tambien trae
+status pero lo omiti en este caso
+
+23-30: guardamos vow en una variable para futura referencia y usamos jsdom, en
+este caso le estamos mandando el html q regresa zombie, le inyectamos jquery y
+mandamos a llamar el callback local para la siguiente prueba
+
+32-39: 'the title is Express' esta prueba contiene el resultado de jsdom q es
+un posible error y el window que contiene toda la pagina, es el mismo window
+que usamos en javascript en el browser, checamos por errores y si todo esta
+bien nos traemos jquery que inyectamos antes y revisamos si el titulo es
+Express tal y como lo hariamos en una pagina regular con jquery.
+
+Por ultimo crearemos nuestro main.js que es para llamar las pruebas, este paso
+es totalmente opcional, pueden ponerle run en el mismo archivo de las pruebas
+o usar este main y de ahi cargarlos:
+
+    
+<pre class="brush: js">
+    #!/usr/bin/env node
+    /**
+     * Test runner
+     *
+    */
+    var controllers = require('./controllers');
+    controllers.findN.run();
+</pre>
+
+Lo unico que hacemos es tomar el archivo para hacer las pruebas y corremos
+nuestra prueba con run
+
+Dense una vuelta por las urls para que revisen la documentacion de lo que
+usamos y vean cosas mas avanzadas, cualquier duda pónganla en los comentarios
+
+[http://vowsjs.org/](http://vowsjs.org/)
+
+[http://zombie.labnotes.org/](http://zombie.labnotes.org/)
+
+[https://github.com/tmpvar/jsdom](https://github.com/tmpvar/jsdom)
