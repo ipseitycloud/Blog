@@ -24,7 +24,7 @@ escoger couchdb que también funciona muy bien solo que necesitaran otro orm
 
 Para empezar instalamos express de manera global para poder generar la app
 
-    
+<pre class="brush: js">
     npm install express -g
     express nomi-nation
     cd nomi-nation
@@ -33,13 +33,14 @@ Para empezar instalamos express de manera global para poder generar la app
     package.json
     public
     views
+</pre>
 
 Ya en el folder vemos que tenemos app.js que es un esqueleto para empezar a
 programar, por si sola esta parte funciona solo habrá que instalar las
 dependencias, esas dependencias están descritas en el package.json que se ve
 algo así, puede tener otras versiones
 
-    
+<pre class="brush: js">
     {
         "name": "application-name"
       , "version": "0.0.1"
@@ -49,24 +50,27 @@ algo así, puede tener otras versiones
         , "jade": "&amp;gt;= 0.0.1"
       }
     }
+</pre>
 
 entonces hacemos,
 
-    
+<pre class="brush: js">
     npm install -d
+</pre>
 
 Esto instalara todas las dependencias que están descritas en el package.json
 
 Ahora ah ver nuestra app funcionando
 
-    
+<pre class="brush: js">
     node app.js
+</pre>
 
 Abrimos nuestro navegador en la ruta localhost:3000 y veremos nuestra pagina
 inicial, vamos a revisar por partes el script app.js
 
     
-    
+<pre class="brush: js">
     /**
      * Module dependencies.
      */
@@ -104,7 +108,7 @@ inicial, vamos a revisar por partes el script app.js
     
     app.listen(3000);
     console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
-    
+</pre>
 
 Linea 6 cargamos el framework con require, este es el formato para cargar los
 modulos necesarios
@@ -136,26 +140,25 @@ En views tenemos dos templates, index.jade que es el template donde tenemos la
 pagina ppal y layout.jade que es el layout por default que toman las paginas,
 layout se ve algo asi:
 
-    
+<pre class="brush: js">
     !!!
     html
      head
        title= title
        link(rel='stylesheet', href='/stylesheets/style.css')
      body!= body
+</pre>
 
 !!! es para especificar la version de html
 
 title= es para crear el tag title con lo q venga en la variable title y al
 final lo q se defina en el body que es index.jade
 
-    
+<pre class="brush: js">
     h1= title
     p Welcome to #{title}
+</pre>
 
 Aqui del mismo modo creamos un header 1 con lo q venga de la variable title y
 generamos un tag p con "Welcome to y lo que venga en la variable title, pueden
-ver mas ejemplos de jade en github o en su [pagina](http://jade-lang.com/)
-
-Post largo y apenas estamos conociendo el mundo de node, en el proximo post
-empezaremos a escribir algo de codigo
+ver mas ejemp

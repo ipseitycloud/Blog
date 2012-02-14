@@ -11,12 +11,11 @@ app
 
 En nuestro package.json agregamos:
 
-    
+<pre class="brush: js">    
     , "log" : "1.2.0"
+</pre>
 
 para que quede:
-
-    
     
 <pre class="brush: js">
 {
@@ -36,46 +35,42 @@ para que quede:
 
 y despues desde el folder root de la app hacemos
 
-    
-    
+<pre class="brush: js">
     npm install -d
-    
+</pre>
 
 Con esto instalamos todas las dependencias nuevas, en este caso solo log
 
 Iniciamos nuestras varialbles para el log:
 
-    
-    
+<pre class="brush: js">
     Log = require('log'),
      log = new Log(),
      fs = require('fs');
-    
+</pre>
 
 en nuestra parte de la configuracion inicializamos el log
 
     
-    
+<pre class="brush: js">
     log.level = Log.DEBUG;
      log.stream = fs.createWriteStream('logs/dev.log', { flags: 'w' });
-    
+</pre>
 
 Esta configuracion es para desarrollo para produccion pueden cambiar el nombre
 del log y el nivel de logueo a notice, ya en nuestro codigo podemos loguear a
 nuestro archivo
 
-    
-    
+<pre class="brush: js">
     log.notice('landed on:' + new Date());
-    
+</pre>
 
 Bien ya tenemos el logueo listo, vamos cambiando las rutas a un archivo dif,
 es bastante sencillo, primero creamos un folder llamado routes y metemos un
 archivo index.js q es la unica ruta q tenemos ahorita, el nombre del archivo
 no importa realmente, el archivo index quedara algo asi:
 
-    
-    
+<pre class="brush: js">
     /**
      * Rutas principales
      *
@@ -89,15 +84,14 @@ no importa realmente, el archivo index quedara algo asi:
      res.render('index', { title: 'Express' });
      });
     };
-    
+</pre>
 
 regresando a nuestro app.js, borramos la ruta q teniamos y agregamos esto:
 
-    
-    
+<pre class="brush: js">
     // Routes
     require('./routes/index')(app, log);
-    
+</pre>
 
 En este caso estamos agregando las rutas y pasandole la app y log para poder
 hacer logueo
