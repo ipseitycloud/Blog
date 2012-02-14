@@ -1,0 +1,157 @@
+{
+    "title" : "Nodejs parte 7 - conectarse a facebook",
+    "date" : "01/17/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Vamos conectandonos a facebook para traer informacion del usuario y guardar su
+access token para futuros queries a facebook mientras dura la sesion, no
+guardaremos mas que user id y name.
+
+Para esto vamos actualizando nuestro index.js para tomar el modulo de
+facebook-js, este modulo ya lo tenemos instalado, lo pusimos desde el
+principio
+
+    
+    var fb = require('facebook-js');
+
+y agregamos algunas rutas, primero para la de login que es la que va a
+redirigir a facebook para que el usuario ingrese o bien si ya esta adentro que
+acepte el usar la aplicación y que la aplicación tome algunas cosas de su
+perfil, ya si esta todo eso solo redirecciona al "redirect_uri" que
+especifiquemos
+
+    
+<pre class="brush: js">
+        /\*\*
+         \* Login page
+        \*/
+        app.get('/login', function(req, res){
+            log.notice('trying to login:' + new Date());
+            res.redirect(fb.getAuthorizeUrl({
+                client_id: '264644053569277', //put the client id
+                redirect_uri: 'http://nomi-nation.pinguxx.c9.io/auth/fb', //cambiar si es necesario
+                scope: 'offline_access,publish_stream,read_stream'
+            }));
+        });
+        /\*\*
+         \* FB return
+        \*/
+        app.get('/auth/fb', function(req, res){
+            log.notice('response from fb: ' + new Date());
+            fb.getAccessToken('264644053569277', //clientid
+                '76ded2bf195073ce7a183a1ef1cd0b8a', //app secret
+                req.param('code'),
+                'http://nomi-nation.pinguxx.c9.io/auth/fb', //cambiar si es necesario
+                function (error, access_token, refresh_token) {
+                    if (error){
+                        log.debug('error getting access token:' + error);
+                        throw new Error('Error getting the acccess token');
+                    }
+                    log.notice('trying to get the tokens:' + new Date());
+                    req.session.user = {};
+                    req.session.user.access_token = access_token;
+                    req.session.user.access_token_secret = refresh_token;
+                    fb.apiCall('GET', '/me/', {access_token: req.session.user.access_token}, function(error, response, body){
+                        if (error){
+                            log.debug('error getting user info:' + error);
+                            throw new Error('Error getting user information');
+                        }
+                        log.notice('getting info from user:' + body.id);
+                        req.session.user.name = body.username;
+                        req.session.user.id = body.id;
+                        res.redirect('/dashboard');
+                    });
+                }
+            );
+        });
+</pre>
+
+Linea 4 y 5: tomamos el path login y logueamos que alguien intenta acceder
+
+6: hacemos un redirect a lo que nos regrese el api de fb
+
+7: agregamos el client id que nos proporciona facebook al crear una nueva app,
+si no saben como hacer esto diganme y creo un post con estos pasos
+
+8: el redirect_uri es a donde vamos a regresar una vez que el usuario haya
+aceptado usar nuestra app
+
+9: el scope de nuestra app, que cosas vamos a ver del usuario, lo podemos
+cambiar mas tarde, pero por el momento dejamos el offline_access, publish y
+read stream que es para publicar en su muro y leerlo, aunque no creo que
+necesitaremos leer, pero lo dejamos por si acaso… una buena practica es solo
+pedir lo necesario asi los usuarios aceptan con mayor facilidad las apps y no
+les da tanta desconfianza, para propositos del ejemplo lo dejaremos asi
+
+15 y 16: el path para cuando el usuario regresa de fb y loguamos que fb nos
+dio respuesta
+
+17-21: le pedimos a facebook un access token para usar en la session, le
+pasamos el client_id y e, codigo secreto de la app, el codigo que manda
+facebook como parametro, nuestra uri y nuestro callback
+
+22-25: ups algo malo paso, lo reportamos
+
+26-30: logueamos y guardamos en la session el accesstoken y hacemos otra
+llamada a la api pero ahora para tomar la info del usuario "/me", le mandamos
+el access_token que acabamos de obtener y nuestro callback
+
+31-38: checamos errors, logueamos y guardamos en la session el id y el nombre
+del usuario, al final redirigimos a nuestra ruta "/dashboard"
+
+Bien para manejar la ruta y las próximas rutas de dashboard usaremos otro
+archivo que le llamaremos dashboard.js en este por el momento solo
+declararemos la ruta principal
+
+    
+<pre class="brush: js">
+    /\*\*
+     \* Rutas dashboard
+    \*/
+    module.exports = function(app, log){
+    
+        /\*\*
+         \* Dashboard landing
+        \*/
+        app.get('/dashboard', function(req, res){
+            log.notice('landed on dashboard user: ' +
+                req.session.user.id + ' on: ' + new Date() );
+            res.render('dashboard', { user: req.session.user });
+        });
+    };
+</pre>
+
+Sencillo, solo logueamos y mandamos a nuestro template de jade dashboard el
+objeto user, el template lo veremos en un momento
+
+Para que nuestra app sepa de esta nueva ruta habrá que agregarla a app.js
+justo como agregamos las de index, quedara algo así:
+
+    
+    require('./routes/dashboard')(app, log);
+
+Listo, nuestro template lo llamaremos dashboard.jade y en este por el momento
+solo mostraremos los datos que nos trajimos de facebook
+
+    
+<pre class="brush: js">
+    .username #{t('dashboard.user_name')}: #{user.name}
+    .userid #{t('dashboard.user_id')}: #{user.id}
+</pre>
+
+Usamos ya nuestra librería para traducción y ponemos el name e id del usuario
+
+Bien ahora solo falta actualizar nuestros archivos translation.json de todos
+los idiomas :S
+
+    
+<pre class="brush: js">
+        "dashboard":{
+            "user_name" : "Nombre del usuario",
+            "user_id" : "Id del usuario"
+        }
+</pre>
+
+Y listo, nuestra app ya se esta conectando a facebook y bajando información de
+ahi

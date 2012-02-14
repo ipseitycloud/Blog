@@ -1,0 +1,498 @@
+{
+    "title" : "Nodejs parte 8 - ui",
+    "date" : "01/18/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Vamos viendo el ui, primero lo "mockie" en cacoo, y mas o menos esta es la
+idea
+
+Index
+
+![](https://cacoo.com/diagrams/gZmGOZMQQuN8K9Tl-FC9AD.png)
+
+Dashboard
+
+![](https://cacoo.com/diagrams/gZmGOZMQQuN8K9Tl-93A6B.png)
+
+Bien pues a crearlas con jade
+
+Usare la estructura de html5boilerplate junto con sus css, solo agregaremos
+pequeñas cosas nosotros, al final mostrare todo el css
+
+Asi nos va a quedar el index.jade
+
+    
+<pre class="brush: js">
+    #header-container
+        header.wrapper.clearfix
+            h1.title= t('app.name')
+    #main-container
+        #main.wrapper.clearfix
+            table.att_table
+                thead
+                    tr
+                        th= t('index.features')
+                tbody
+                    tr
+                        td= t('index.feature1')
+                    tr
+                        td= t('index.feature2')
+                    tr
+                        td= t('index.feature3')
+                    tr
+                        td= t('index.feature4')
+                    tr
+                        td= t('index.feature5')
+                        td
+                            a(href="/login")
+                                img(src="/images/cwf.png")
+            - if (error)
+                .error #{error}
+    #footer-container
+        footer.wrapper
+            .ficon
+                img(src="/images/ipn.png")
+</pre>
+
+Ponemos nuestro titulo, una tabla con los features, una imagen para loguearnos
+por facebook, un placeholder por si regresan errores y nuestro footer con un
+logo, nos queda algo asi:
+
+[![](http://ipseitycloud.com/wordpress/wp-content/uploads/2012/01
+/nomination_home-300x109.png)](http://ipseitycloud.com/wordpress/wp-
+content/uploads/2012/01/nomination_home.png)
+
+Dashboard.jade
+
+    
+<pre class="brush: js">
+    #header-container
+        header.wrapper.clearfix
+            .new
+                a#nn(href="#")= t('dashboard.new_nomination')
+            .loading
+                img(src="/images/loading.png")
+            .exit
+                a(href="/logout")= t('dashboard.exit')
+    #main-container
+        #main.wrapper.clearfix
+            .nominations
+                div.nheader.title #{t('dashboard.mine')}
+                ul
+                    li
+                        input(type="checkbox", checked="true")
+                        label  Nomination 1
+                    li
+                        input(type="checkbox")
+                        label  Nomination 2
+                    li
+                        input(type="checkbox")
+                        label  Nomination 3
+                div.title #{t('dashboard.appear')}
+                ul
+                    li
+                        input(type="checkbox")
+                        label  Nomination a
+                    li
+                        input(type="checkbox")
+                        label  Nomination b
+                    li
+                        input(type="checkbox")
+                        label  Nomination d
+                    li
+                        input(type="checkbox")
+                        label  Nomination e
+                    li
+                        input(type="checkbox")
+                        label  Nomination f
+                    li
+                        input(type="checkbox")
+                        label  Nomination g
+                    li
+                        input(type="checkbox")
+                        label  Nomination h
+    
+                div.title #{t('dashboard.voted')}
+                ul
+                    li
+                        input(type="checkbox")
+                        label  Nomination i
+                    li
+                        input(type="checkbox")
+                        label  Nomination ii
+                    li
+                        input(type="checkbox")
+                        label  Nomination iii
+            .details
+                fieldset.fs
+                    legend Nomination 1
+                    .header
+                        .users #{t('dashboard.users')}
+                        .add
+                            a#am(href="#")#{t('dashboard.add_more')}
+                        .date Date
+                    br
+                    .list
+                        table.userst
+                            thead
+                                tr
+                                    th #{t('dashboard.name')}
+                                    th #{t('dashboard.votes')}
+                                    th
+                            tbody
+                                tr
+                                    td User 1
+                                    td 2
+                                    td
+                                        a(href="#") #{t('dashboard.vote')}
+                                        | /
+                                        a(href="#") #{t('dashboard.erase')}
+                                tr
+                                    td User 2
+                                    td 3
+                                    td
+                                        a(href="#") #{t('dashboard.vote')}
+                                        | /
+                                        a(href="#") #{t('dashboard.erase')}
+                                - for (var i =4; i                                tr
+                                        td User #{i}
+                                        td #{Math.floor(Math.random()*11)}
+                                        td
+                                            a(href="#") #{t('dashboard.vote')}
+                                            | /
+                                            a(href="#") #{t('dashboard.erase')}
+                    .btns
+                        button.myButton#end #{t('dashboard.end_nomination')}
+                        button.myButton#remove #{t('dashboard.remove_me')}
+                        button.myButton#cancel #{t('dashboard.cancel')}
+            .images
+            .logo logo
+            .ficon
+                img(src="/images/ipn.png")
+    #footer-container
+        footer.wrapper
+    
+    #dialog-new(title="Create new nomination")
+        p.validateTips All form fields are required
+        form
+            fieldset
+                label.forml(for="name") Name:
+                input#name.text.ui-widget-content.ui-corner-all(type="text", name="name")
+                br
+                label.forml(for="email") End date:
+                input#datep.text.ui-widget-content.ui-corner-all(type="text", name="datep")
+    
+    #dialog-add(title="Add friends")
+        form
+            fieldset
+                ol#selectable
+                    li.ui-state-default 1
+                    li.ui-state-default 2
+                    li.ui-state-default 3
+                    li.ui-state-default 4
+                    li.ui-state-default 5
+                    li.ui-state-default 6
+</pre>
+
+Estamos poniendo muchas cosas que borraremos despues, es solo para demostrar
+que se ve bien, lo unico interesante aqui seria el for para rellenar algunos
+usuarios en las lineas 89-96, despues haremos el llenado desde la app.
+
+Al final tenemos dos formas perdidas, estas en el css las escondemos porque
+las generaremos como dialogos usando jquery-ui, para esto ahi que agregar todo
+al proyecto, imagenes, css y js de jquery-ui y ponerlos en nuestro
+layout.jade, primero el css
+
+    
+    
+    link(rel="stylesheet", href="/stylesheets/jquery-ui.css", type="text/css")
+    
+
+y luego el js
+
+    
+    script(defer, src="/javascripts/lib/jquery-ui.min.js")
+
+Entonces las formas las creamos como dialogos y ponemos un datepicker para la
+fecha final, lo agregamos a script.js
+
+    
+<pre class="brush: js">
+        $( "#datep" ).datepicker();
+        $( "#selectable" ).selectable();
+        $("#nn").click(function(){
+            $( "#dialog-new" ).dialog( "open" );
+        });
+        $("#am").click(function(){
+            $( "#dialog-add" ).dialog( "open" );
+        });
+        $( "#dialog-new" ).dialog({
+        	autoOpen: false,
+    		height: 300,
+    		width: 450,
+    		modal: true,
+    		buttons: {
+    			"Create a nomination": function() {
+    				$( this ).dialog( "close" );
+    			},
+    			Cancel: function() {
+    				$( this ).dialog( "close" );
+    			}
+    		},
+    		close: function() {
+    			//TODO:
+    		}
+    	});
+        $( "#dialog-add" ).dialog({
+            autoOpen: false,
+    		height: 300,
+    		width: 450,
+    		modal: true,
+    		buttons: {
+    			"Add friend(s)": function() {
+    				$( this ).dialog( "close" );
+    			},
+    			Cancel: function() {
+    				$( this ).dialog( "close" );
+    			}
+    		},
+    		close: function() {
+    			//TODO:
+    		}
+    	});
+</pre>
+
+Tambien solo quiero que un checkbox este seleccionado a la vez y que puedan
+seleccionar el checkbox al darle click en el label, usamos algo de jquery y lo
+agregamos a script.js:
+
+    
+<pre class="brush: js">
+        function checkOne(){
+            var currentEl = $(this);
+            $("input:checked").each(function(){
+                $(this).attr('checked', false);
+            });
+            if (currentEl.is('input')){
+                currentEl.attr('checked', true);
+                return;
+            }
+            var checkbox = currentEl.siblings('input');
+            checkbox.attr('checked', !checkbox.attr('checked'));
+        }
+        $(".nominations ul label").click(checkOne);
+        $(".nominations ul input").click(checkOne);
+</pre>
+
+Aqui solo escuchamos al evento click en el checkbox y en el label y mandamos a
+llamar a nuestra funcion en la cual estamos checando los q estan seleccionados
+y lo deseleccionamos despues traemos su sibling input y lo seleccionamos
+
+Nos queda algo asi:
+
+[![](http://ipseitycloud.com/wordpress/wp-content/uploads/2012/01
+/nomination_dashboard-300x181.png)](http://ipseitycloud.com/wordpress/wp-
+content/uploads/2012/01/nomination_dashboard.png)
+
+y los dialogos
+
+[![](http://ipseitycloud.com/wordpress/wp-content/uploads/2012/01
+/nomination_add_friends-300x206.png)](http://ipseitycloud.com/wordpress/wp-
+content/uploads/2012/01/nomination_add_friends.png)
+
+[![](http://ipseitycloud.com/wordpress/wp-content/uploads/2012/01
+/nomination_new_nomination-300x200.png)](http://ipseitycloud.com/wordpress/wp-
+content/uploads/2012/01/nomination_new_nomination.png)
+
+El css aparte de lo de html5boilerplate es el siguiente:
+
+    
+<pre class="brush: css">
+    /* =============================================================================
+       Primary styles
+       Author: mrpix
+       ========================================================================== */
+    .logo{
+        text-align: center;
+    }
+    .list{
+        margin-top: 20px;
+    }
+    .btns{
+        margin-top: 5%;
+    }
+    #main-container{
+        height: 500px;
+    }
+    #main{
+        height: 100%;
+    }
+    .userst th, .userst td{
+        border: 1px solid #ededed;
+    }
+    .userst th{
+        background-color: #ededed
+    }
+    .userst{
+        width: 95%;
+    }
+    .btns button{
+        margin-left: 5%;
+    }
+    .users, .add{
+        float: left;
+        margin-right: 30%;
+    }
+    .date{
+        float: right;
+    }
+    .nominations .title{
+        background-color: #ededed;
+        width: 60%;
+        padding: 0 0 0 40px;
+        border: 1px solid black;
+        text-align: left;
+    }
+    .nominations ul{
+        border: 1px solid black;
+        width: 60%;
+        height: 120px;
+        overflow: auto;
+        margin-bottom: 0;
+    }
+    .nheader{
+        -webkit-border-top-left-radius: 13px;
+        -webkit-border-top-right-radius: 13px;
+        -moz-border-radius-topleft: 13px;
+        -moz-border-radius-topright: 13px;
+        border-top-left-radius: 13px;
+        border-top-right-radius: 13px;
+    }
+    .nominations li{
+        list-style:none;
+        background-color: white;
+        margin-left: 0;
+        border-bottom: 1px solid #ededed;
+        margin-left: -25px;
+    }
+    label{
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    .nominations{
+        width: 30%;
+        height: 90%;
+        overflow: auto;
+        float: left;
+    }
+    .details{
+        width: 69%;
+        height: 90%;
+        overflow: auto;
+        float: left;
+    }
+    .new{
+        float: left;
+    }
+    .loading{
+        text-align: center;
+    }
+    .exit{
+        float: right;
+        margin-top: -1.7em;
+    }
+    
+    .copy {
+        text-align: center;
+    }
+    .ficon{
+    	float: right;
+    }
+    
+    .title{
+    	text-align: center;
+    }
+    .att_table
+    {
+    
+    	background: #fff;
+    	margin: 0px 40px 3px 50px;
+    	width: 90%;
+    	border-collapse: collapse;
+    	text-align: left;
+    }
+    .att_table th
+    {
+    
+    	color: #039;
+    	padding: 10px 8px;
+    	border-bottom: 2px solid #6678b1;
+    }
+    .att_table td
+    {
+    	border-bottom: 1px solid #ccc;
+    	color: #669;
+    	padding: 6px 8px;
+    }
+    .att_table tbody tr:hover td
+    {
+    	color: #00c;
+    }
+    .myButton {
+        -moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
+    	-webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
+    	box-shadow:inset 0px 1px 0px 0px #ffffff;
+    	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf) );
+    	background:-moz-linear-gradient( center top, #ededed 5%, #dfdfdf 100% );
+    	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf');
+    	background-color:#ededed;
+    	-moz-border-radius:6px;
+    	-webkit-border-radius:6px;
+    	border-radius:6px;
+    	border:1px solid #dcdcdc;
+    	display:inline-block;
+    	color:#777777;
+    	font-family:arial;
+    	font-size:15px;
+    	font-weight:bold;
+    	padding:6px 24px;
+    	text-decoration:none;
+    	text-shadow:1px 1px 0px #ffffff;
+    }.myButton:hover {
+    	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed) );
+    	background:-moz-linear-gradient( center top, #dfdfdf 5%, #ededed 100% );
+    	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed');
+    	background-color:#dfdfdf;
+    }.myButton:active {
+    	position:relative;
+    	top:1px;
+    }
+    #dialog-add, #dialog-new{
+        display: none;
+    }
+    #selectable .ui-selecting { background: #FECA40; }
+    #selectable .ui-selected { background: #F39814; color: white; }
+    #selectable { list-style-type: none; margin: 0; padding: 0; }
+    #selectable li { margin: 3px; padding: 1px; float: left; width: 50px; height: 40px; font-size: 2em; text-align: center; }
+</pre>
+
+Si necesitan ayuda con el css o algo no duden en preguntarme
+
+Podriamos ir generando todo el contenido desde jade, poner loops en los
+templates para mostrar las nominaciones etc, pero en realidad es muy costoso
+en tiempo y recursos compilar todo desde jade, asi que el approach que
+usaremos sera traernos los datos con jquery, regresar json desde nuestra app,
+rellenar ya sea con jquery para los pedazos pequeños o minimal para rellenar
+el dom y listo, es mas rapido y no generas tanto trafico solo el json
+necesario
+
+Ah por cierto el diseño esta fellon pero ahi va, haber si la diseñadora me
+hecha la mano o si alguien quiere participar, es bienvenido
+
+Para ver todo el codigo, revisen el github
+
+[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-
+mexico/nomi-nation)
+
+Saludos
