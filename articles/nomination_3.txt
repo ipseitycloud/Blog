@@ -71,6 +71,7 @@ archivo index.js q es la unica ruta q tenemos ahorita, el nombre del archivo
 no importa realmente, el archivo index quedara algo asi:
 
 <pre class="brush: js">
+```
     /**
      * Rutas principales
      *
