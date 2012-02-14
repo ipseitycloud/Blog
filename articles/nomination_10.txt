@@ -160,8 +160,8 @@ Agregamos la ruta a nuestro dashboard.js
     
 <pre class="brush: js">
     /\*\*
-     \* Invitar amigos
-     \*/
+    \* Invitar amigos
+    \*/
     app.post('/invite', checkUser, function(req, res){
         var usersl = req.param('users');
         var userl = 0;
@@ -186,8 +186,8 @@ Agregamos la ruta a nuestro dashboard.js
             }
         }else{
             onerror = function (error) {
-                    if (error) { log.debug('error posting on voted user'); return; }
-                };
+                if (error) { log.debug('error posting on voted user'); return; }
+            };
             fb.apiCall(
                 'POST',
                 '/'+usersl._id+'/feed',
