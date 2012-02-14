@@ -19,19 +19,19 @@ para que quede:
     
     
 <pre class="brush: js">    
-    {
-        "name": "nomi-nation"
-        , "version": "0.0.1"
-        , "private": true
-        , "dependencies": {
-            "express": "2.5.2"
-            , "jade": ">= 0.0.1"
-            , "express-messages" : ">= 0.0.2"
-            , "facebook-js" : "1.0.1"
-            , "mongoose" : "2.4.8"
-            , "log" : "1.2.0"
-        }
+{
+    "name": "nomi-nation"
+    , "version": "0.0.1"
+    , "private": true
+    , "dependencies": {
+        "express": "2.5.2"
+        , "jade": ">= 0.0.1"
+        , "express-messages" : ">= 0.0.2"
+        , "facebook-js" : "1.0.1"
+        , "mongoose" : "2.4.8"
+        , "log" : "1.2.0"
     }
+}
 </pre>    
 
 y despues desde el folder root de la app hacemos
