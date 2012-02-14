@@ -1,0 +1,63 @@
+{
+	"title" : "Desarrollo con node.js - parte 1",
+	"date" : "10/01/2012",
+	"author" : "Mrpix, pinguxx"
+}
+
+Empezare a publicar algunas cosas sobre el desarrollo con node.js, mientras
+iremos desarrollando una aplicacion que sera publica, asi que podran ayudarme,
+regañarme, guiarme, sus aportaciones son valiosas
+
+Por lo pronto pueden seguirme en @pinguxx en twitter, github, facebook
+
+El codigo lo hire subiendo a github a nomi-nation, ahorita hay codigo pero
+solo ejemplos
+
+En el proximo post pondre que haremos, que herramientas vamos a usar y la idea
+en general.
+
+Por lo pronto install node.js
+
+[http://nodejs.org/](http://nodejs.org/)
+
+Ya sea que se bajen el msi para windows o el pkg para mac, o si son linuxeros
+habra que compilar
+
+Si es windows, la ultima version ya viene con mejor soporte nativo para
+windows entonces no tendran problemas, menos con mac, solo instalen python
+antes
+
+Si es linux, ya saben, bajenlo y corran los comandos
+
+<script src="https://gist.github.com/1439672.js"> </script>
+  
+Node esta listo.
+
+Ahora bajamos npm
+
+```
+git clone git://github.com/isaacs/npm.git
+```
+
+o bajen el codigo y a instalar
+
+```
+sudo make install
+```
+
+Listo tenemos npm, npm es para instalar rapida y facilmente los modulos que
+iremos necesitando
+
+Si algo falla puedes intentar utilizar la forma mas automatizada en este link:
+
+[http://www.e-capy.com/instalar-node-js-y-npm-de-forma-automatizada/](http://www.e-capy.com/instalar-node-js-y-npm-de-forma-automatizada/)
+
+Ya que tengas todo listo, crea tu primer programa
+    
+<script src="https://gist.github.com/1439687.js"> </script>
+  
+Lo guardas en un archivo app.js y lo corres con node app.js
+
+vas a tu navegador y vas a 127.0.0.1:1337, veras tu hola mundo
+
+Eso es todo por ahora

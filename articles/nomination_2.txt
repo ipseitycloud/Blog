@@ -1,0 +1,161 @@
+{
+	"title" : "Desarrollo con node.js - parte 2",
+	"date" : "12/01/2012",
+	"author" : "Mrpix, pinguxx"
+}
+
+Bueno ahora que ya tenemos nuestro node.js y npm listo y funcionando vamos
+empezando a instalar lo necesario para la app
+
+Primero vamos definiendo que vamos a utilizar
+
+express como web framework para manejar las rutas
+
+express-messages para mostrar mensajes de manera mas sencilla
+
+jade para los templates
+
+Facebook-js para conectarnos a la red social
+
+mongoose como nuestro orm
+
+También instalaremos mongodb (si necesitan ayuda haganmelo saber) o pueden
+escoger couchdb que también funciona muy bien solo que necesitaran otro orm
+
+Para empezar instalamos express de manera global para poder generar la app
+
+    
+    npm install express -g
+    express nomi-nation
+    cd nomi-nation
+    ls
+    app.js
+    package.json
+    public
+    views
+
+Ya en el folder vemos que tenemos app.js que es un esqueleto para empezar a
+programar, por si sola esta parte funciona solo habrá que instalar las
+dependencias, esas dependencias están descritas en el package.json que se ve
+algo así, puede tener otras versiones
+
+    
+    {
+        "name": "application-name"
+      , "version": "0.0.1"
+      , "private": true
+      , "dependencies": {
+          "express": "2.4.6"
+        , "jade": "&amp;gt;= 0.0.1"
+      }
+    }
+
+entonces hacemos,
+
+    
+    npm install -d
+
+Esto instalara todas las dependencias que están descritas en el package.json
+
+Ahora ah ver nuestra app funcionando
+
+    
+    node app.js
+
+Abrimos nuestro navegador en la ruta localhost:3000 y veremos nuestra pagina
+inicial, vamos a revisar por partes el script app.js
+
+    
+    
+    /**
+     * Module dependencies.
+     */
+    
+    var express = require('express');
+    
+    var app = module.exports = express.createServer();
+    
+    // Configuration
+    
+    app.configure(function(){
+      app.set('views', __dirname + '/views');
+      app.set('view engine', 'jade');
+      app.use(express.bodyParser());
+      app.use(express.methodOverride());
+      app.use(app.router);
+      app.use(express.static(__dirname + '/public'));
+    });
+    
+    app.configure('development', function(){
+      app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+    });
+    
+    app.configure('production', function(){
+      app.use(express.errorHandler());
+    });
+    
+    // Routes
+    
+    app.get('/', function(req, res){
+      res.render('index', {
+        title: 'Express'
+      });
+    });
+    
+    app.listen(3000);
+    console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+    
+
+Linea 6 cargamos el framework con require, este es el formato para cargar los
+modulos necesarios
+
+8, creamos el servidor
+
+12-19 especificamos configuraciones, donde se encuentran las vistas o nuestros
+templates, el engine a usar (puede ser hamo u otro soportado por express),
+usamos el router para las routas de nuestra app y la dirección de los recursos
+estáticos de la app (imágenes, js, css, etc)
+
+21-27 configuraciones especificas por ambiente
+
+31-35 La ruta principal de la app, tenemos app que es nuestra variable donde
+creamos el servidor, después .get que es el verbo http, solo respondera a
+request de tipo get si es post no entrara aqui tendríamos q crear get.post
+para eso, después la ruta que es '/' y la función para manejar esa ruta, res
+que es la respuesta y render para renderear el template con el nombre index y
+un tempalte default por ultimo le mandamos la variable title.
+
+37 le decimos que la app escuche en el puerto 3000 y listo la app empieza
+
+38 logueamos en la consola el puerto y el ambiente
+
+Por el momento en public solo tenemos un stylesheet basico y lo demás esta
+vacío
+
+En views tenemos dos templates, index.jade que es el template donde tenemos la
+pagina ppal y layout.jade que es el layout por default que toman las paginas,
+layout se ve algo asi:
+
+    
+    !!!
+    html
+     head
+       title= title
+       link(rel='stylesheet', href='/stylesheets/style.css')
+     body!= body
+
+!!! es para especificar la version de html
+
+title= es para crear el tag title con lo q venga en la variable title y al
+final lo q se defina en el body que es index.jade
+
+    
+    h1= title
+    p Welcome to #{title}
+
+Aqui del mismo modo creamos un header 1 con lo q venga de la variable title y
+generamos un tag p con "Welcome to y lo que venga en la variable title, pueden
+ver mas ejemplos de jade en github o en su [pagina](http://jade-lang.com/)
+
+Post largo y apenas estamos conociendo el mundo de node, en el proximo post
+empezaremos a escribir algo de codigo

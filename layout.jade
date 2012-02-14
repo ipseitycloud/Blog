@@ -1,0 +1,52 @@
+!!! 5
+head
+	title #{title}
+	link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=PT+Sans', type='text/css')
+	link(rel='stylesheet', href=base_url + '/main.css', type='text/css')
+body
+	div.topbar
+		ul
+			li
+				a(href='http://ipseitycloud.com') Home
+			li
+				a(href='http://twitter.com/ipseitycloud') @ipseitycloud
+	div.blog_title
+		<a href='!{base_url}/'>!{title}</a>
+	- each article in articles
+		div.article
+			div.header
+				div.title
+					<a href='!{base_url}/!{article.url}/'>!{article.title}</a>
+				div.date !{article.date_str}
+			div.body !{article.body}
+
+			- if (typeof single !== 'undefined' && single && disqus_id !== -1)
+				script(type='text/javascript)
+					/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+					var disqus_shortname = '!{disqus_id}'; // required: replace example with your forum shortname
+
+					/* * * DON'T EDIT BELOW THIS LINE * * */
+					(function() {
+						var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+						dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+						(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+					})();
+
+				div#disqus_thread
+
+	// Please do not remove
+	div.footer
+		a(href='http://github.com/guyht/glog') Powered by Glog
+
+	- if (typeof analytics_code !== 'undefined' && analytics_code !== null)
+		script(type='text/javascript')
+			var _gaq = _gaq || [];
+			_gaq.push(['_setAccount', '!{analytics_code}']);
+			_gaq.push(['_trackPageview']);
+
+			(function() {
+				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+			})();
+
