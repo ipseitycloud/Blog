@@ -71,14 +71,14 @@ archivo index.js q es la unica ruta q tenemos ahorita, el nombre del archivo
 no importa realmente, el archivo index quedara algo asi:
 
 <pre class="brush: js">
-    /**
-     * Rutas principales
-     *
-    */
+    /\*\*
+     \* Rutas principales
+     \*
+    \*/
     module.exports = function(app, log){
-     /*
-     * GET home page.
-     */
+     /\*
+     \* GET home page.
+     \*/
      app.get('/', function(req, res){
      log.notice('landed on:' + new Date());
      res.render('index', { title: 'Express' });
