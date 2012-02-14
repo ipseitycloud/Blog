@@ -96,35 +96,35 @@ y jquery en script.js
     
 <pre class="brush: js">
     $('#sf').submit(function(){
-            var searchTerm = $('#sf').find('.search').val();
-            if (searchTerm){
-                $('.loading').show();
-                //console.log(searchTerm);
-                $.post("/nominations/search", { term: searchTerm },
-                    function(data) {
-                        if (data){
-                            var datal = data.length;
-                            if (datal <1 ){
-                                showMsg('dashboard.warning', 'dashboard.notfound');
-                                $('.loading').hide();
-                                return;
-                            }
-                            var dialog = $( '#dialog-sr' );
-                            var fs = dialog.find('#sr');
-                            fs.html('');
-                            for (var i=0;i<datal;i++){
-                                fs.append('<input type="radio" name="sr" value="'+data[i]._id+'"> '+data[i].name+'<br>');
-                            }
-                            dialog.dialog('open');
-                        }else{
-                            showMsg('dashboard.error', 'dashboard.error_searching');
+        var searchTerm = $('#sf').find('.search').val();
+        if (searchTerm){
+            $('.loading').show();
+            //console.log(searchTerm);
+            $.post("/nominations/search", { term: searchTerm },
+                function(data) {
+                    if (data){
+                        var datal = data.length;
+                        if (datal <1 ){
+                            showMsg('dashboard.warning', 'dashboard.notfound');
+                            $('.loading').hide();
+                            return;
                         }
-                        $('.loading').hide();
+                        var dialog = $( '#dialog-sr' );
+                        var fs = dialog.find('#sr');
+                        fs.html('');
+                        for (var i=0;i<datal;i++){
+                            fs.append('<input type="radio" name="sr" value="'+data[i]._id+'"> '+data[i].name+'<br>');
+                        }
+                        dialog.dialog('open');
+                    }else{
+                        showMsg('dashboard.error', 'dashboard.error_searching');
                     }
-                ).error(function() { $('.loading').hide(); showMsg('dashboard.error', 'dashboard.error_searching'); });
-            }
-            return false;
-        });
+                    $('.loading').hide();
+                }
+            ).error(function() { $('.loading').hide(); showMsg('dashboard.error', 'dashboard.error_searching'); });
+        }
+        return false;
+    });
 </pre>
 
 3. Para poder invitar a mas amigos a la app hacemos algo similar, agregamos un
@@ -169,8 +169,8 @@ Agregamos la ruta a nuestro dashboard.js
         if (usersl instanceof Array){
             userl = usersl.length;
             onerror = function (error) {
-                        if (error) { log.debug('error posting on voted user'); return; }
-                    };
+                if (error) { log.debug('error posting on voted user'); return; }
+            };
             for (var i=0;i<userl;i++){
                 fb.apiCall(
                     'POST',
