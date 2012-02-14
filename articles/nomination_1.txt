@@ -1,6 +1,6 @@
 {
 	"title" : "Desarrollo con node.js - parte 1",
-	"date" : "10/01/2012",
+	"date" : "01/11/2012",
 	"author" : "Mrpix, pinguxx"
 }
 
