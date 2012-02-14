@@ -1,0 +1,110 @@
+{
+    "title" : "Desarrollo con node.js parte 3 – actualizando app.js y logueo",
+	"date" : "13/01/2012",
+	"author" : "Mrpix, pinguxx"
+}
+
+Regresando un poco a la pagina principal, preferi de una vez separar las rutas
+de la pagina principal para no hacer un mega script ademas de que agregaremos
+logueo simple con el modulo log; empezamos agregando el modulo log a nuestra
+app
+
+En nuestro package.json agregamos:
+
+    
+    , "log" : "1.2.0"
+
+para que quede:
+
+    
+    
+    
+    {
+     "name": "nomi-nation"
+     , "version": "0.0.1"
+     , "private": true
+     , "dependencies": {
+     "express": "2.5.2"
+     , "jade": ">= 0.0.1"
+     , "express-messages" : ">= 0.0.2"
+     , "facebook-js" : "1.0.1"
+     , "mongoose" : "2.4.8"
+     , "log" : "1.2.0"
+     }
+    }
+    
+
+y despues desde el folder root de la app hacemos
+
+    
+    
+    npm install -d
+    
+
+Con esto instalamos todas las dependencias nuevas, en este caso solo log
+
+Iniciamos nuestras varialbles para el log:
+
+    
+    
+    Log = require('log'),
+     log = new Log(),
+     fs = require('fs');
+    
+
+en nuestra parte de la configuracion inicializamos el log
+
+    
+    
+    log.level = Log.DEBUG;
+     log.stream = fs.createWriteStream('logs/dev.log', { flags: 'w' });
+    
+
+Esta configuracion es para desarrollo para produccion pueden cambiar el nombre
+del log y el nivel de logueo a notice, ya en nuestro codigo podemos loguear a
+nuestro archivo
+
+    
+    
+    log.notice('landed on:' + new Date());
+    
+
+Bien ya tenemos el logueo listo, vamos cambiando las rutas a un archivo dif,
+es bastante sencillo, primero creamos un folder llamado routes y metemos un
+archivo index.js q es la unica ruta q tenemos ahorita, el nombre del archivo
+no importa realmente, el archivo index quedara algo asi:
+
+    
+    
+    /**
+     * Rutas principales
+     *
+    */
+    module.exports = function(app, log){
+     /*
+     * GET home page.
+     */
+     app.get('/', function(req, res){
+     log.notice('landed on:' + new Date());
+     res.render('index', { title: 'Express' });
+     });
+    };
+    
+
+regresando a nuestro app.js, borramos la ruta q teniamos y agregamos esto:
+
+    
+    
+    // Routes
+    require('./routes/index')(app, log);
+    
+
+En este caso estamos agregando las rutas y pasandole la app y log para poder
+hacer logueo
+
+Pueden ver el codigo en:
+
+[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-
+mexico/nomi-nation)
+
+Saludos
