@@ -52,11 +52,11 @@ controllers.js quedaria asi:
 
     
 <pre class="brush: js">
-    /**
-     *
-     * Controller testing
-     *
-    */
+    /\*\*
+     \*
+     \* Controller testing
+     \*
+    \*/
     var vows = require('vows'),
         assert = require('assert'),
         nominator = require('../controllers/nominator.js');
@@ -249,10 +249,10 @@ Agregamos el codigo a nuestro archivo routes.js para que quede algo como esto:
     
     
 <pre class="brush: js">
-    /**
-     *
-     * Test index route
-    */
+    /\*\*
+     \*
+     \* Test index route
+    \*/
     var vows = require('vows'),
         assert = require('assert'),
         zombie = require('zombie'),
@@ -327,10 +327,10 @@ o usar este main y de ahi cargarlos:
     
 <pre class="brush: js">
     #!/usr/bin/env node
-    /**
-     * Test runner
-     *
-    */
+    /\*\*
+     \* Test runner
+     \*
+    \*/
     var controllers = require('./controllers');
     controllers.findN.run();
 </pre>
