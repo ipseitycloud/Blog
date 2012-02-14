@@ -20,17 +20,17 @@ para que quede:
     
 <pre class="brush: js">    
     {
-     "name": "nomi-nation"
-     , "version": "0.0.1"
-     , "private": true
-     , "dependencies": {
-     "express": "2.5.2"
-     , "jade": ">= 0.0.1"
-     , "express-messages" : ">= 0.0.2"
-     , "facebook-js" : "1.0.1"
-     , "mongoose" : "2.4.8"
-     , "log" : "1.2.0"
-     }
+        "name": "nomi-nation"
+        , "version": "0.0.1"
+        , "private": true
+        , "dependencies": {
+            "express": "2.5.2"
+            , "jade": ">= 0.0.1"
+            , "express-messages" : ">= 0.0.2"
+            , "facebook-js" : "1.0.1"
+            , "mongoose" : "2.4.8"
+            , "log" : "1.2.0"
+        }
     }
 </pre>    
 
@@ -105,3 +105,6 @@ hacer logueo
 Pueden ver el codigo en:
 
 [https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-
+mexico/nomi-nation)
+
+Saludos
