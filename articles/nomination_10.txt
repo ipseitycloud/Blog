@@ -25,6 +25,8 @@ express para facebook
 
 [Parte 9](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-9---rutas-y-ajax/)
 
+[Parte 10](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-10---ultimos-toques/)
+
 Vamos haciendo ya una versión beta con la mayor funcionalidad que podamos,
 integrando algún tipo de búsqueda, una forma de invitar amigos, un logo y
 arreglamos los bugs que nos hayan reportado los usuarios que ya la probaron…

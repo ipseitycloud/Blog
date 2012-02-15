@@ -9,6 +9,24 @@ express para facebook
 
 [Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
 
+[Parte 2](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-2/)
+
+[Parte 3](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js-parte-3-–-actualizando-app.js-y-logueo/)
+
+[Parte 4](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-4-–-modelos/)
+
+[Parte 5](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-5---pruebas/)
+
+[Parte 6](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-6---internacionalizacion/)
+
+[Parte 7](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-7---conectarse-a-facebook/)
+
+[Parte 8](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-8---ui/)
+
+[Parte 9](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-9---rutas-y-ajax/)
+
+[Parte 10](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-10---ultimos-toques/)
+
 Bueno ahora que ya tenemos nuestro node.js y npm listo y funcionando vamos
 empezando a instalar lo necesario para la app
 

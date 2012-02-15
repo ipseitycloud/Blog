@@ -23,6 +23,10 @@ express para facebook
 
 [Parte 8](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-8---ui/)
 
+[Parte 9](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-9---rutas-y-ajax/)
+
+[Parte 10](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-10---ultimos-toques/)
+
 Lista la ui vamos a ponerla a trabajar, primero vamos creando nuestras rutas
 para manejar todos los posibles request desde nuestro front-end, tenemos que
 manejar las nominaciones, creacion, borrado, agregado de usaurio, terminacion
@@ -881,18 +885,18 @@ faltan varios puntos de mejora, pero por el momento la dejamos funcionando en
 un server y empezamos a notificar a los usuarios para que se empiece a usar,
 empiecen a nominar a sus amigos en:
 
-http://nomination.cloudno.de
+[http://nomination.cloudno.de]http://nomination.cloudno.de
 
 Cualquier feedback pásenlo por aquí o en la pagina de facebook
 
-<a href="https://www.facebook.com/pages/Nomi-nation/354591181220133″>https://www.facebook.com/pages/Nomi-nation/354591181220133</a>
+[https://www.facebook.com/pages/Nomi-nation/354591181220133]https://www.facebook.com/pages/Nomi-nation/354591181220133</a>
 
 Por otra parte logo aun no tenemos, sofy esta pensando en uno, si alguien mas
 tiene input de diseño pásenlo y lo tomamos en cuenta
 
 Revisen el codigo en github
 
-<a href="https://github.com/nodejs-mexico/nomi-nation">https://github.com/nodejs-mexico/nomi-nation</a>
+[https://github.com/nodejs-mexico/nomi-nation]https://github.com/nodejs-mexico/nomi-nation</a>
 
 En la próxima solo agregaremos algunas cosas extras, crearemos nuestro readme
 en github y listo
