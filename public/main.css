@@ -88,6 +88,10 @@ a:hover {
 	text-decoration: none;
 }
 
+.next_page, .footer {
+	text-align: center;
+}
+
 .body pre code, .body pre tt {
 background-color: transparent;
 border: none;
