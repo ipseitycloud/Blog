@@ -1,0 +1,167 @@
+{
+    "title" : "Nomination mobile - parte 1",
+    "date" : "02/19/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Este post es parte de una serie sobre como crear una aplicacion con node.js y
+express para facebook en su version movil
+
+Ve como se creo la version de escritorio que consta de 10 partes
+
+[Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+
+Ahora que ya tenemos nuestra version de nomination, vamos creando la version 
+mobile de nomination, para que se vea bien en smartphones y en tablets.
+
+Para esto usaremos jquery-mobile y crearemos nuestros layout especificos para
+mobile.
+
+La pagina estoy pensando que quede mas o menos asi:
+
+Index
+
+![](http://blog.ipseitycloud.com/images/index.png)
+
+Dashboard
+
+![](http://blog.ipseitycloud.com/images/dashboard.png)
+
+Vamos a crear el layout con jade para moviles, primero vamos a subir todo lo de
+jquerymobile, tenemos q subir el css, el js y las imagenes, actualizen el css
+para que apunte bien los paths de las imagenes, vamos a crear un archivo y le 
+llamaremos `layout.jade` que va en el folder views
+
+```
+!!! 5
+//if lt IE 7
+  | <html class="no-js ie6 oldie" lang="en">
+//if IE 7
+  | <html class="no-js ie7 oldie" lang="en">
+//if IE 8
+  | <html class="no-js ie8 oldie" lang="en">
+//if gte IE 9
+  | <html class="no-js" lang="en">
+head
+  meta(charset='utf-8')
+  meta(http-equiv="X-UA-Compatible",content="IE=edge,chrome=1")
+  title= t('app.name')
+  meta(name='description', content='Nomination')
+  meta(name='author', content='mrpix')
+  meta(name="viewport", content="width=device-width, initial-scale=1")
+  link(rel="shortcut icon", href="/images/favicon.ico")
+  link(rel="apple-touch-icon", href="/images/apple-touch-icon.png")
+  // CSS
+  link(rel="stylesheet", href="/stylesheets/jqm.css", type="text/css")
+  - if (type === 'dashboard')
+    link(rel="stylesheet", href="/stylesheets/dashboard.css", type="text/css")
+  - else
+    link(rel="stylesheet", href="/stylesheets/index.css", type="text/css")
+  script(src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
+  script
+     window.jQuery \|\| document.write("<script src='/javascripts/lib/jquery-1.7.1.min.js'>\\x3C/script>")
+  script(src="/javascripts/lib/jqm.js")
+body
+  != body
+  script(defer, src='i18next/i18next.js', type='text/javascript')
+  - if (type === 'dashboard')
+    script(defer, src="/javascripts/mscript.js")
+  script
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-XXXXXXXX-X']);
+    _gaq.push(['_trackPageview']);
+    
+    (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+| </html>
+```
+
+Aqui cargamos el css de jquery mobile y los js primero jquery y luego 
+jquerymobile, i18next, nuestra funcionalidad con mscript y luego la parte de los
+analytics
+
+Vamos a crear el index para nuestra version movil, creamos un archivo llamado
+`indexm.jade` dentro del folder views tambien
+
+```
+- var login = "/login";
+- if (invited)
+    - login = "/login?invited="+invited;
+div(data-role="page", data-theme="d")
+    div(data-role="header", data-theme="b")
+        h1= t('app.name')
+
+    div(data-role="content")
+        table.att_table
+            thead
+                tr
+                    th= t('index.features')
+            tbody
+                tr
+                    td= t('index.feature1')
+                tr
+                    td= t('index.feature2')
+                tr
+                    td= t('index.feature3')
+                tr
+                    td= t('index.feature4')
+                tr
+                    td= t('index.feature5')
+        a(href="#{login}", rel="external")
+            img(src="/images/cwf.png")
+        - if (error)
+            .error #{t(error)}
+        img(src="/images/ipn.png", width="90px")
+    div(data-role="footer", data-theme="b")
+        h4 &copy; Ivan Torres -MrPix
+```
+
+Linea 1-3: primero checamos nuestra variable por si llega a alguien invitado
+
+4: Creamos nuestra pagina, con el `data-role="page"` le indicamos a jquery que
+este div es un container de la pagina con el tema "d"
+
+5-6: Este div es el header de la pagina solo tendra el titulo de la pagina y
+tendra el tema "b", al ser el header se vera el titulo centrado y como barra
+en la parte de arriba de la pagina
+
+8-29: el contenido de la pagina, con `data-role="content"` se le especifica a
+jqm, es solo una table con la lista de features justo como la pagina regular
+y nuestro boton de login con el logo de la pagina
+
+30-31: el footer de la pagina, solo tiene el copyright, tema "b" y su 
+`data-role="footer"`
+
+Muy bien vamos a actualizar nuestro manejador de rutas para que si es movil
+rendereamos la pagina movil sino la regular, actualizamos  "roues/index.js"
+
+Cargamos nuestro modulo alrededor de la linea 5 y agregamos una variable, 
+este modulo lo creamos en el [post anterior](http://blog.ipseitycloud.com/2012/02/Creando-modulo-para-node.js/):
+
+```
+bowser = require('node-bowser'),
+bt;
+```
+
+En nuestra ruta principal usamos el modulo para ver que layout mostrar:
+
+```
+bt = new bowser(req);
+if (bt.isMobile() || bt.isTablet()){
+    console.log('is mobile or tablet');
+}else{
+    console.log('not mobile or tablet');
+}
+```
+
+Si es mobile o tablet mostramos la version mobile, sino la version regular de
+escritorio
+
+Por lo pronto solo crearemos eso, iremos agregando funcionalidad y paginas poco
+a poco
+
+
+Saludos
