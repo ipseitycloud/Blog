@@ -151,9 +151,22 @@ En nuestra ruta principal usamos el modulo para ver que layout mostrar:
 ```
 bt = new bowser(req);
 if (bt.isMobile() || bt.isTablet()){
-    console.log('is mobile or tablet');
+    res.render('indexm', 
+                { 
+                    error : req.param('error'), 
+                    type: 'index', 
+                    invited: req.param('invited'),
+                    layout: 'layoutm'
+                }
+            );
 }else{
-    console.log('not mobile or tablet');
+    res.render('index', 
+                { 
+                    error : req.param('error'), 
+                    type: 'index', 
+                    invited: req.param('invited')
+                }
+            );
 }
 ```
 
