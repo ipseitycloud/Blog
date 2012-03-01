@@ -1,6 +1,6 @@
 {
-    "title" : "Nomination mobile - parte 1",
-    "date" : "02/19/2012",
+    "title" : "Nomination mobile - parte 2",
+    "date" : "03/01/2012",
     "author" : "Mrpix, pinguxx"
 }
 
