@@ -1,0 +1,312 @@
+{
+    "title" : "Nomination mobile - parte 1",
+    "date" : "02/19/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Este post es parte de una serie sobre como crear una aplicacion con node.js y
+express para facebook en su version movil
+
+[Parte 1](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-1/)
+
+Ve como se creo la version de escritorio que consta de 10 partes
+
+[Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+
+Ya que tenemos nuestro index, vamos creando la vista del dashboard, en este post
+crearemos todas las vistas de las nominaciones que tiene un usuario que son
+"Mias", "Vote", "Aparezco", la pantalla nos quedara mas o menos asi:
+
+Dashboard
+
+![](http://blog.ipseitycloud.com/images/dashboard.png)
+
+
+Bueno, hay que empezar con el layout de la pagina, para esto creamos un archivo
+llamado "dashboardm.jade"
+
+<pre class="brush: js">
+- if (invited)
+    .invited(invited="#{invited}")
+#dashboard-mine(data-role="page", data-theme="d")
+    div(data-role="header", data-theme="b", data-position="inline")
+        h1= t('app.name')
+        a(href="#", data-icon="plus", class="ui-btn-right") Invite
+        div(data-role="navbar")
+            ul
+                li
+                    a#minel.ui-btn-active(href="#dashboard-mine", data-icon="star") Mine
+                li
+                    a#votedl(href="#dashboard-voted", data-icon="check") Voted
+                li
+                    a#appearl(href="#dashboard-appear", data-icon="alert") Appear
+        ///navbar
+    ///header
+    div(data-role="content")
+        fieldset.ui-grid-b
+            .ui-block-a
+                a.create(href="#", data-role="button", data-theme="b") Create
+            .ui-block-b
+            .ui-block-c
+                a(href="#", data-role="button", data-theme="b", data-icon="refresh") Refresh
+        br
+        ul#mine(data-role="listview")
+            li(data-role="list-divider") Select to see the details
+    ///content
+
+    div(data-role="footer", data-theme="b", data-position="fixed")
+        label(data-theme="c", for="search-basic") Search nomination:
+        input#searc-basic(data-theme="c", type="search", name="search", value="")
+    ///footer
+
+///page mine
+#dashboard-voted(data-role="page", data-theme="d")
+    div(data-role="header", data-theme="b", data-position="inline")
+        h1= t('app.name')
+        a(href="#", data-icon="plus", class="ui-btn-right") Invite
+        div(data-role="navbar")
+            ul
+                li
+                    a#minel(href="#dashboard-mine", data-icon="star") Mine
+                li
+                    a#votedl.ui-btn-active(href="#dashboard-voted", data-icon="check") Voted
+                li
+                    a#appearl(href="#dashboard-appear", data-icon="alert") Appear
+        ///navbar
+    ///header
+
+    div(data-role="content")
+        fieldset.ui-grid-b
+            .ui-block-a
+                a.create(href="#", data-role="button", data-theme="b") Create
+            .ui-block-b
+            .ui-block-c
+                a(href="#", data-role="button", data-theme="b", data-icon="refresh") Refresh
+        br
+        ul#voted(data-role="listview")
+            li(data-role="list-divider") Select to see the details
+    ///content
+
+    div(data-role="footer", data-theme="b", data-position="fixed")
+        label(data-theme="c", for="search-basic") Search nomination:
+        input#searc-basic(data-theme="c", type="search", name="search", value="")
+    ///footer
+
+///page voted
+#dashboard-appear(data-role="page", data-theme="d")
+
+    div(data-role="header", data-theme="b", data-position="inline")
+        h1= t('app.name')
+        a(href="#", data-icon="plus", class="ui-btn-right") Invite
+        div(data-role="navbar")
+            ul
+                li
+                    a#minel(href="#dashboard-mine", data-icon="star") Mine
+                li
+                    a#votedl(href="#dashboard-voted", data-icon="check") Voted
+                li
+                    a#appearl.ui-btn-active(href="#dashboard-appear", data-icon="alert") Appear
+        ///navbar
+    ///header
+
+    div(data-role="content")
+        fieldset.ui-grid-b
+            .ui-block-a
+                a.create(href="#", data-role="button", data-theme="b") Create
+            .ui-block-b
+            .ui-block-c
+                a(href="#", data-role="button", data-theme="b", data-icon="refresh") Refresh
+        br
+        ul#appear(data-role="listview")
+            li(data-role="list-divider") Select to see the details
+    ///content
+
+    div(data-role="footer", data-theme="b", data-position="fixed")
+        label(data-theme="c", for="search-basic") Search nomination:
+        input#searc-basic(data-theme="c", type="search", name="search", value="")
+    ///footer
+
+///page appear
+#popup(data-role="page")
+    
+    div(data-role="header", data-theme="e")
+        h1 Message
+    ///header
+
+    div(data-role="content", data-theme="d")
+        h2#title
+        p#msg
+        p
+            a(href="#one", data-rel="back", data-role="button", data-inline="true", data-icon="back") Back
+    ///content
+
+    div(data-role="footer")
+        h4= t('app.name')
+    ///footer
+
+///page message
+</pre>
+
+Linea 1-2: revisamos si viene referenciado a alguna nominacion
+
+3: Pagina para nominaciones mine, se especifica que este div conforma una
+pagina con `data-role="page"` y ademas le decimos que use el tema "d" con
+`data-theme="d"`
+
+4: El header de la pagina se le indica con `data-role="header"` y usaremos el
+tema "b" y su posicion va a ser "in-line", jqm lo pondra como barra en la parte
+de arriba de la pagina
+
+5: El header de la app, como esta dentro del header, quedara centrado en la 
+barra del header
+
+6: Link para invitar personas, es un a regular que jqm lo hace como un boton
+y ademas unas cosas extras como `data-icon="plus"` con esto le indicamos que 
+queremos un icono de "+" y `class="ui-btn-right"` le decimos que pase este boton
+a la derecha, si no ponemos esta regla el primer "a" lo pondra a la izquierda
+y el segunda a la derecha, pero como solo tenemos uno y lo queremos a la derecha
+usamos esta clase
+
+7: Nuestro navigation bar `data-role="navbar"`, se conforma de una lista que jqm
+acomodara como una barra vertical con botones grandes con las opciones de la 
+lista
+
+8-14: Cada li es una opcion de nuestro navigation bar, justo abajo de la barra
+del header, cada "li" tiene un "a" que a su vez tiene un icono, ademas de que
+el "a" de la pagina actual le pondremos una clase para que se vea diferente que
+es `.ui-btn-active`
+
+17: nuestro contenido de la pagina `data-role="content"` 
+
+18: en este caso primero usaremos un fieldset con la clase `.ui-grid-b` esto
+quiere decir que la pagina la dividira en 3 partes, las cuales llenaremos con
+div con una clase en especifico, hay diferentes fieldset que divide la pantalla
+en mas o menos partes
+
+19-23: todas las partes del fieldset se llenan con estas divs con la clase 
+`.ui-block-a` el ultimo caracter va cambiando a  "b" y "c" para este caso que
+se divide en 3 partes para otros usaremos mas o menos caracteres, tambien 
+estamos agregando en 2 divs unos "a" con `data-role="button"` para que jqm
+los muestro como botones, en este caso no lo hizo automatico porque los links
+no estan dentro de una navegacion o dentro del header/footer
+
+25-26: una lista para ahi meter las nominaciones de tipo mine del usuario 
+`data-role="listview"`, estamos agregando un primer elemento a la lista pero de
+tipo `data-role="list-divider"` esto quiere decir que no es un elemento regular
+sino un divisor de lista osea como un pequeño titulo entre los elementos, en
+este caso hasta arriba por ser el primero
+
+29: El footer `data-role="footer"` con tema "b" y con su posicion fija, esto
+quiere decir que si la lista de nominacion es muy larga, el footer aparecer
+sobre la lista y el usuario tendra que desplazarse hacia abajo para ver los 
+demas elementos, mientras se desplaza el footer se ocultara, cuando termine de
+desplazarse volvera aparecer y siempre al fondo de la pagina
+
+30-31: una forma para hacer busquedas, el label y su input, aparecera al fondo
+dentro del footer
+
+35-101: la pagina mine, se repite varias veces pero para cada tipo de 
+nominacion, los datos son similares, solo cambian algunas cosas como el titulo
+o el boton activo en la navegacion
+
+Si se fijan todo esta en una sola pagina, la primera pagina que se mostrara es
+la primera que tengamos en el archivo, las demas no las procesara sino hasta que
+entremos a alguna, jqm las carga con ajax al intentar entrar en ellas
+
+102-119; pagina que la usaremos de pop-up, por si sola es una pagina como 
+cualquier otra, en este caso estamos poniendo algunos divs que llanremos al
+momento de cargarla o en este caso de mostrar un mensaje, se vera como pop-up
+ya que la cargaremos de esa forma, esto lo veremos en el codigo de js
+
+Esto es todo para la parte de jade, veamos ahora nuestro js que agregaremos en 
+"mscript.js"
+
+```
+$( document ).bind( "mobileinit", function() {
+    // Make your jQuery Mobile framework configuration changes here!
+    $.mobile.touchOverflowEnabled = true;
+    $.mobile.allowCrossDomainPages = true;
+});
+function loadNominations(type){
+    $.mobile.showPageLoadingMsg();
+    $.getJSON('http://nomination.cloudno.de/nominations/'+type, function(data) {
+        var list = $('#'+type);
+        if (data.length < 1 ){
+            //showMsg('dashboard.warning', 'dashboard.warning_zarro');
+        }else{
+            $.each(data, function(key, value){
+                list.append('<li id="'+value._id+'" type="'+type+'"><a class="details" href="#">'+value.name+'</a></li>');
+            });
+            list.listview('refresh');
+        }
+        $.mobile.hidePageLoadingMsg();
+    }).error(function() { $.mobile.hidePageLoadingMsg(); showMsg('dashboard.error', 'dashboard.warning_nominations'); });
+}
+$('#dashboard-mine').live('pagecreate', function(){	
+    loadNominations('mine');
+});
+$('#dashboard-voted').live('pagecreate', function(){	
+    loadNominations('voted');
+});
+$('#dashboard-appear').live('pagecreate', function(){	
+    loadNominations('appear');
+});
+function showMsg(err, msg){
+    var dialog = $("#popup");
+	dialog.find("#title").html(err);
+	dialog.find("#msg").html(msg);
+	$.mobile.changePage( dialog );
+}
+```
+
+1-5: inicializamos algunas cosas de jquery mobile
+
+6-20: esta funcion nos sirve para cargar las nominaciones por tipo, primero
+mostramos un loading gif para indicar que estamos trabajando y luego con ajax
+traemos la lista en formato json del server dependiendo del tipo, si no hay
+errores y trae datos, las agregamos a la lista de nominaciones que el id tiene
+el mismo nombre que el tipo y al agregarlas todas hacemos un refresh al listview
+sino se veran sin formato, al final quitamos nuestro loading; si hay un error
+mostramos nuestra pagina de error
+
+21-29: estas funciones solo le dice a jqm que cuando la pagina con ese id, la
+termine de cargar haga x funcion, seria el tipo "ready" de jquery pero como 
+aca se cargan con ajax y ese "ready" no existe, usamos esta funcion, en todos
+los casos llamamos a la funcion "loadNominations" con el tipo de nominaciones
+que queremos cargar para esa pagina
+
+30-35: la funcionalidad para mostrar mensajes en pantalla, en este caso cargamos
+el dialogo, lo llenamos con algunos datos y mostramos el dialog con changepage
+que seria como darle click a algun link que nos lleve ahi
+
+Bueno para poder ver esta pagina hay que hacer temporalmente una ruta, ya que 
+aun no tenemos mucha funcionalidad, para esto tenemos que actualizar 
+"dashboard.js" alrededor de la linea 56 con esto:
+
+```
+/**
+ * Dashboardm landing, TODO: erase this
+*/
+app.get('/dashboardm', function(req, res){
+    res.render('dashboardm', 
+        { 
+            user: req.session.user, 
+            error : req.param('error'), 
+            type: 'dashboard', 
+            invited: false,
+            layout: 'layoutm'
+        });
+});
+```
+
+Creamos una nueva ruta donde mostraremos lo que acabamos de hacer, solamente
+estamos mostrando la pagina con el layout mobile que hicimos en el post anterior
+y algunas variables necesarias, para poder ver esta pagina entren regularmente a
+la aplicacion, ya que esten logueados cambien el final de la url por 
+"dashboardm" y veran la parte movil
+
+Fork the code
+
+[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-mexico/nomi-nation)
+
+Saludos
