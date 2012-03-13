@@ -1,0 +1,374 @@
+{
+    "title" : "Nomination mobile - parte 3",
+    "date" : "03/13/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Este post es parte de una serie sobre como crear una aplicacion con node.js y
+express para facebook en su version movil
+
+[Parte 1](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-1/)
+[Parte 2](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-2/)
+
+Ve como se creo la version de escritorio que consta de 10 partes
+
+[Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+
+En esta ocasion vamos a ver como crear una nueva nominacion, como ver los
+detalles y como invitar amigos
+
+Para empezar vamos actualizando nuestro `dashboardm.jade`
+
+```
+#newn(data-role="page")
+    div(data-role="header", data-theme="e")
+        h1 New nomination
+    //header
+
+    div(data-role="header", data-theme="e")
+        #errornf
+        form#newf.ui-body.ui-body-a.ui-corner-all
+            fieldset
+                div(data-role="fieldcontain")
+                    label(for="name") Name:
+                    input#name(type="text", cols="40", rows="8", name="name")
+                    label(for="date") End Date:
+                    input#date(type="date", cols="40", rows="8", name="date")
+                    button#newnfs(data-theme="b") Submit
+    //content
+
+    div(data-role="footer")
+        a( href="#", data-rel="back", data-icon="back") Back
+    //footer
+
+///page new nomination
+#addf(data-role="page")
+    div(data-role="header", data-theme="e")
+        h1 Add friends
+    //header
+
+    div(data-role="header", data-theme="d")
+        div(data-role="fieldcontain")
+            fieldset#lof(data-role="controlgroup")
+    //content
+
+    div.ui-bar(data-role="footer", data-theme="b", data-position="fixed")
+        a#bina(href="#", data-icon="back") Back
+        a.add(href="#", data-role="button", data-theme="b") Add
+
+///page add friends
+#details(data-role="page")
+
+    div(data-role="header", data-theme="b")
+        a#cancel(href="#", data-icon="delete") Cancel
+        h1 Details
+        a#end(href="#", data-icon="check") End
+    ///header
+
+    div(data-role="content")
+        #attd
+        .name
+        .endD
+        ul.users(data-role="listview")
+            li(data-role="list-divider") Swipe to Vote/Delete
+    ///content
+
+    .ui-bar(data-role="footer", data-theme="b", data-position="fixed")
+        div(data-role="controlgroup", data-type="horizontal")
+            a(href="#", data-rel="back", data-icon="back") Back
+            a#adduser(href="#", data-icon="plus") Add
+            a(href="#", data-icon="refresh") Refresh
+            a#remove(href="#", data-icon="minus") Remove Me
+    ///footer
+
+///page details
+```
+
+Estamos agregando 3 paginas, una para cada cosa, todas dentro del mimsmo
+html
+
+En new form agregamos una forma donde pedimos el nombre y la fecha de 
+terminacion
+
+En add friends, mostramos la lista de amigos para que el usuario los seleccione
+y los pueda agregar a la nominacion
+
+Y por ultimo los detalles, esta plantilla servira para todos los tipos de 
+nominaciones solo mostraremos algunos botones y otros no dependiendo del tipo
+pero esto lo haremos con jquery
+
+Ok, ahora hay que actualizar nuestro script para todo esto `mscript.js`
+
+Primero agregamos la parte de cargar a los amigos:
+
+```
+function loadUsers(next){
+    $.getJSON(next || 'http://nomination.cloudno.de/friends', function(data) {
+    if (data.data.length > 0){
+        var list = $('#lof');
+	    $.each(data.data, function(key, value){
+		list.append('<input type="checkbox" name="'+value.name+'" id="'+value.id+'" />');
+		list.append('<label for="'+value.id+'">'+value.name+'</label>');
+	    });
+	    $('#lof').trigger( 'updatelayout' );
+	    loadUsers(data.paging.next);
+	}else{
+	    return;
+	}
+    }).error(function() { showMsg('dashboard.error', 'dashboard.error_friends'); });
+}
+```
+
+En este caso estamos cargando la lista de amigos de facebook y agregandola a la
+lista para usarla despues, esta lista la cargaremos en cuanto entren a la pagina
+para esto agregamos al page create una llamada a esta funcion
+
+```
+$('#dashboard-mine').live('pagecreate', function(){    
+    loadNominations('mine');
+    loadUsers(null);
+});
+```
+
+Ahora que ya se estan cargando los amigos, vamos a crear una nominacion, 
+recuerdan que pusimos un boton en todas las paginas de nominaciones que dice
+"create", bueno pues vamos a darle funcionalidad, primero agregamos a `mscrip.js`
+
+```
+$('.create').live('click', function(){
+    $.mobile.changePage( "#newn", { transition: "pop"} );
+});
+```
+
+Con esto le decimos a jqm que al darle click al boton de crear se cambie a la
+pagina de nueva nominacion
+
+Ya ahi, esperamos input del usuario y agregamos funcionalidad al boton de enviar
+(submit)
+
+```
+$('#newnfs').live('click', function(ev){
+    ev.preventDefault();
+    $.mobile.showPageLoadingMsg();
+    var name = $('#name').val();
+    var date = $('#date').val();
+    if (name!=='' && date !==''){
+	$('#errornf').html('');
+	$.post("http://nomination.cloudno.de/nominations/create", { name: name, datep: date },
+	    function(data) {
+            var list = $('#mine');
+            list.append('<li id="' + 
+                data._id + '" type="mine"><a class="details" href="#">' + 
+                data.name + '</a></li>');
+            list.listview('refresh');
+            $.mobile.hidePageLoadingMsg();
+            $.mobile.changePage( "#dashboard-mine" );
+            return false;
+        }
+	).error(function() {
+	    $.mobile.hidePageLoadingMsg();
+	    $('#errornf').html('Error saving the nomination, try again later');
+	    return false;
+	});
+	return false;
+    }else{
+	$('#errornf').html('Name and date required');
+	$.mobile.hidePageLoadingMsg();
+	return false;
+    }
+});
+```
+
+Primero mostramos nuestro mensaje de que estamos trabajando, traemos los datos
+de la forma, revisamos que tengamos datos, si falta algo le mostramos un error
+al usuario
+
+Despues hacemos un post a nuestro server con los datos suministrados, y si todo
+esta bien la agregamos a la lista de mine, refrescamos la lista para que tome
+los estilos, cerramos nuestro mensajito de que estamos trabajando y cambiamos a 
+la lista de mios, si surgio un error lo reportamos y nos quedamos ahi
+
+Ya tenemos una nominacion, vamos a ver los detalles, para esto le damos a todas
+las listas la funcionalidad, todos los elementos de las listas tienen la clase
+`details` entonces usaremos esa
+
+```
+$('.details').live('click', function(){
+    $.mobile.showPageLoadingMsg();
+	var li = $(this).parents('li');
+	var id = li.attr('id');
+	var type = li.attr('type');
+	$('#details').find('#attd').attr('past',$.mobile.activePage.attr('id'));
+	showNomination(id, type, false);
+	$.mobile.changePage($("#details"));
+});
+```
+
+Tomamos los datos de cual nominacion seleccionaron, agregamos algunos datos a la
+pagina de detalles, cargamos la nominacion con la funcion `showNomination` y
+cambiamos a la pagina detalles
+
+La funcion `showNomination` quedara algo asi:
+
+```
+//cargar la nominacion y llenar details
+function showNomination(id, type, refresh){
+    $.mobile.showPageLoadingMsg();
+    $.getJSON('http://nomination.cloudno.de/nominations/'+id, function(data) {
+        if (!data){
+            //alert('Du! nominacion ya no existe o termino :(');
+            showMsg('dashboard.warning', 'dashboard.warning_erased');
+        }
+        var details = $('#details');
+        details.find('#attd').attr('nid',id);
+        details.find('#attd').attr('type',type);
+        details.find('.name').html(data.name);
+        var daten = new Date();
+        daten.setISO8601(data.endDate);
+        details.find('.endD').html( daten.getDate()+'/'+(daten.getMonth()+1)+'/'+daten.getUTCFullYear());
+        var ntype = type;
+        if (ntype === 'appear'){
+            $('#end').hide();
+            $('#cancel').hide();
+            $('#remove').show();
+        }else if (type === 'mine'){
+            $('#end').show();
+            $('#cancel').show();
+            $('#remove').hide();
+        }else{
+            $('#end').hide();
+            $('#cancel').hide();
+            $('#remove').hide();
+        }
+        var usersl = details.find('.users');
+        usersl.html('');
+        var userl = data.users.length;
+        usersl.hide();
+        usersl.append('<li data-role="list-divider">Swipe to Vote/Delete</li>');
+        for (var i=0; i<userl;i++){
+    		usersl.append('<li id="'+data.users[i]._id+'" type="'+type+'">'+
+				'<img src="https://graph.facebook.com/'+data.users[i]._id+'/picture"/>'+
+                data.users[i].name+
+                '<span class="ui-li-count count">'+data.users[i].votes+'</span></li>');
+        }
+        usersl.listview('refresh');
+        usersl.show();
+        $.mobile.hidePageLoadingMsg();
+    }).error(function() {
+        $.mobile.hidePageLoadingMsg();
+        showMsg('dashboard.error', 'dashboard.error_showing'); 
+    });
+}
+```
+
+Aqui traemos los datos de la nominacion y los vamos llenando en la pagina de 
+detalles, depende del tipo son los botons que vamos a mostrar, agregamos la
+lista de amigos nominados y refrescamos la lista, si pasa algun error le 
+informamos al usuario, en esta funcion tambien usamos un prototype para date
+llamado `setISO8601` esto es mas que nada para entender el formato de fecha que
+nos manda facebook, la funcion es asi:
+
+```
+Date.prototype.setISO8601 = function (string) {
+    var regexp = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})" +
+        "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?" +
+        "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?";
+    var d = string.match(new RegExp(regexp));
+
+    var offset = 0;
+    var date = new Date(d[1], 0, 1);
+
+    if (d[3]) { date.setMonth(d[3] - 1); }
+    if (d[5]) { date.setDate(d[5]); }
+    if (d[7]) { date.setHours(d[7]); }
+    if (d[8]) { date.setMinutes(d[8]); }
+    if (d[10]) { date.setSeconds(d[10]); }
+    if (d[12]) { date.setMilliseconds(Number("0." + d[12]) * 1000); }
+    if (d[14]) {
+        offset = (Number(d[16]) * 60) + Number(d[17]);
+        offset *= ((d[15] == '-') ? 1 : -1);
+    }
+
+    offset -= date.getTimezoneOffset();
+    var time = (Number(date) + (offset * 60 * 1000));
+    this.setTime(Number(time));
+};
+```
+
+Bien ya tenemos la nominacion, ahora tenemos que agregar algun amigo, para esto
+vamos a darle la funcionalidad
+
+```
+$('#adduser').live('click', function(){
+    $.mobile.changePage( "#addf",
+    {
+	    transition: "pop",
+	    reverse: false,
+	    changeHash: false
+	});
+});
+```
+
+Esto solo cambia a la pagina de add friends
+
+En add friends mostramos la lista de amigos y un boton de añadir que tiene esta
+funcionalidad
+
+```
+$('.add').live('click', function(){
+    $.mobile.showPageLoadingMsg();
+    var users = [];
+    var userp;
+    $('#lof').find(':checked').each(function(){
+        users.push({
+            "_id" : $(this).attr('id'),
+            "name" : $(this).attr('name'),
+            "votes" : 0
+        });
+    });
+    var ul = users.length;
+    if (ul > 0 && ul <= 1){
+        userp = users[0];
+    }else{
+	    userp = users;
+    }
+    var details = $('#details');
+    var nid = details.find('#attd').attr('nid');
+    var type = details.find('#attd').attr('type');
+    $.post("http://nomination.cloudno.de/nominations/adduser", { id: nid, users: userp },
+	function(data) {
+	    if (data){
+            $.each(users,function(key, value){
+                var usersl = details.find('.users');
+                usersl.append('<li id="'+value._id+'" type="'+type+'">'+
+                    '<img src="https://graph.facebook.com/'+value._id+'/picture"/>'+
+                    value.name+
+                    '<span class="ui-li-count count">0</span></li>');
+                usersl.listview('refresh');
+            });
+            $.mobile.changePage( "#details" );
+	    }else{
+		    $.mobile.changePage( "#details" );
+		    showMsg('dashboard.error', 'dashboard.error_adduser');
+	    }
+	    $.mobile.hidePageLoadingMsg();
+	}).error(function() { 
+        $.mobile.hidePageLoadingMsg(); 
+        showMsg('dashboard.error', 'dashboard.error_adduser'); 
+    });
+});
+```
+
+Tomamos lo susuarios seleccionados de la lista, los agregamos a la nominacion y
+si todo salio bien, los agregamos a la lista en la pagina para despues regresar
+a la pagina de los detalles
+
+Esto es todo por ahora, para la proxima veremos como votar/borrar usuarios en
+una nominacion y como invitar a mas amigos a jugar, asi como otras funciones
+que nos faltan para sacar nuestro beta movil
+
+Fork the code
+
+[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-mexico/nomi-nation)
+
+Saludos
