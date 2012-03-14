@@ -15,7 +15,7 @@ Ve como se creo la version de escritorio que consta de 10 partes
 [Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
 
 En esta ocasion vamos a ver como crear una nueva nominacion, como ver los
-detalles y como invitar amigos
+detalles y como agregar amigos
 
 Para empezar vamos actualizando nuestro `dashboardm.jade`
 
@@ -107,8 +107,8 @@ function loadUsers(next){
     if (data.data.length > 0){
         var list = $('#lof');
 	    $.each(data.data, function(key, value){
-		list.append('<input type="checkbox" name="'+value.name+'" id="'+value.id+'" />');
-		list.append('<label for="'+value.id+'">'+value.name+'</label>');
+    		list.append('<input type="checkbox" name="'+value.name+'" id="'+value.id+'" />');
+    		list.append('<label for="'+value.id+'">'+value.name+'</label>');
 	    });
 	    $('#lof').trigger( 'updatelayout' );
 	    loadUsers(data.paging.next);
