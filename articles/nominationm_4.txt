@@ -1,0 +1,287 @@
+{
+    "title" : "Nomination mobile - parte 4",
+    "date" : "03/23/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Este post es parte de una serie sobre como crear una aplicacion con node.js y
+express para facebook en su version movil
+
+[Parte 1](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-1/)
+[Parte 2](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-2/)
+[Parte 3](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-3/)
+
+Ve como se creo la version de escritorio que consta de 10 partes
+
+[Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+
+Ahora vamos a votar, borrar e invitar amigos a la aplicacion.
+
+Para empezar vamos a agregar una funcionalidad a la lista de amigos, que al
+hacer swipe aparezcan los botones de borrar y votar, para esto actualizamos
+`mscrip.js` despues de agregar a los usuarios en los detalles, agregamos esto
+(alrededor de la linea 150)
+
+```
+$('.users li').bind('swiperight swipeleft', swipe);
+```
+
+Esto buscara la funcion de swipe cada vez q el usuario aga swipe a la izquierda
+o derecha en un elemento de la lista, hay que agregar esta funcion en el mismo
+archivo
+
+```
+function swipe(){
+    // reference the just swiped list item
+    var $li = $(this);
+    // remove all buttons first
+    $('.aDeleteBtn').remove();
+    $('.aVoteBtn').remove();
+    // create buttons and div container
+	var $deleteBtn = $('<a>Delete</a>').attr({
+			'class': 'aDeleteBtn ui-btn-up-r',
+			'href': '#'
+		});
+    var $voteBtn = $('<a>Vote</a>').attr({
+            'class': 'aVoteBtn ui-btn-up-bl',
+			'href': '#'
+		});
+	// insert swipe div into list item
+	$li.prepend($deleteBtn);
+    $li.prepend($voteBtn);
+    $deleteBtn.slideToggle();
+    $voteBtn.slideToggle();
+}
+```
+
+Aqui estamos tomando el li como referencia, borramos los botones si es q ya
+existen para no terminar con duplicados, creamos 2 botons los cuales tienen
+2 clases una sirve para referenciarlos luego y la otra para darles estilo y
+posicionarlos en la pantalla, agregaremos esto a nuestro css
+
+```
+.aDeleteBtn, .aVoteBtn {
+    -moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	float: right;
+	height: 15px;
+	line-height: 15px;
+	margin: 10px 10px 0 0;
+	padding: 0.6em;
+	position: absolute;
+	right: 0;
+	top: 0;
+	z-index: 10;
+    display: none;
+}
+.aDeleteBtn{
+    right: 60px;
+}
+/* red color buttons */
+.ui-btn-up-r { border: 1px solid #953403; background: #2567ab; font-weight: bold; color: #fff; cursor: pointer;  text-shadow: 0 -1px 1px #953403; text-decoration: none; background-image: -moz-linear-gradient(top, #ec4a0b, #ad390c); background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #ec4a0b),color-stop(1, #ad390c));   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#ec4a0b', EndColorStr='#ad390c')"; }
+
+.ui-btn-up-r a.ui-link-inherit { color: #fff; }
+
+.ui-btn-hover-r { border: 1px solid #953403; background: #f15c22; font-weight: bold; color: #fff;  text-shadow: 0 -1px 1px #014D68; background-image: -moz-linear-gradient(top, #f15c22, #f15c22); text-decoration: none; background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #f15c22),color-stop(1, #f15c22));   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#f15c22', EndColorStr='#f15c22')";  }
+
+.ui-btn-hover-r a.ui-link-inherit { color: #fff; }
+
+.ui-btn-down-r { border: 1px solid #225377; background: #79ae21; font-weight: bold; color: #fff; text-shadow: 0 -1px 1px #225377; background-image: -moz-linear-gradient(top, #bc770f, #e6590c); background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #bc770f),color-stop(1, #e6590c));   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#bc770f', EndColorStr='#e6590c')"; }
+
+.ui-btn-down-r a.ui-link-inherit { color: #fff; }
+
+.ui-btn-up-r, .ui-btn-hover-r, .ui-btn-down-r { font-family: Helvetica, Arial, sans-serif; }
+/* blue color buttons */
+.ui-btn-up-bl { border: 1px solid #036596; background: #2567ab; font-weight: bold; color: #fff; cursor: pointer;  text-shadow: 0 -1px 1px #036596; text-decoration: none; background-image: -moz-linear-gradient(top, #2567ab, #036596); background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #2567ab),color-stop(1, #036596));   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#2567ab', EndColorStr='#036596')"; }
+
+.ui-btn-up-bl a.ui-link-inherit { color: #fff; }
+
+.ui-btn-hover-bl { border: 1px solid #036596; background: #2567ab; font-weight: bold; color: #fff;  text-shadow: 0 -1px 1px #014D68; background-image: -moz-linear-gradient(top, #2567ab, #2567ab); text-decoration: none; background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #2567ab),color-stop(1, #2567ab));   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#2567ab', EndColorStr='#2567ab')";  }
+
+.ui-btn-hover-bl a.ui-link-inherit { color: #fff; }
+
+.ui-btn-down-bl { border: 1px solid #225377; background: #79ae21; font-weight: bold; color: #fff; text-shadow: 0 -1px 1px #225377; background-image: -moz-linear-gradient(top, #2567ab, #2567ab); background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #2567ab),color-stop(1, #2567ab));   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#2567ab', EndColorStr='#2567ab')"; }
+
+.ui-btn-down-bl a.ui-link-inherit { color: #fff; }
+
+.ui-btn-up-bl, .ui-btn-hover-bl, .ui-btn-down-bl { font-family: Helvetica, Arial, sans-serif; }
+```
+
+Muy bien ya tenemos los botones, ahora a darles funcionalidad, empezamos con
+borrar, agregamos esta funcion a `mscript.js`
+
+```
+$('.aDeleteBtn').live('click', function(ev){
+    ev.preventDefault();
+    $.mobile.showPageLoadingMsg();
+    var li = $(this).parents('li');
+    var details = $('#details');
+    var nid = details.find('#attd').attr('nid');
+    var user = {
+        _id : li.attr("id"),
+        name : li.attr("name"),
+        votes : li.find(".count").text()
+    };
+    $.post("/nominations/eraseuser", { id: nid, user: user },
+        function(data) {
+            if (data){
+               li.remove();
+               var usersl = details.find('.users');
+               usersl.listview('refresh');
+            }else{
+                showMsg('dashboard.error', 'dashboard.error_erasing_user');
+            }
+            $.mobile.hidePageLoadingMsg();
+        }
+    ).error(function() { $.mobile.hidePageLoadingMsg();
+        showMsg('dashboard.error', 'dashboard.error_erasing_user'); });
+    $('.aVoteBtn').slideToggle();
+    $('.aDeleteBtn').slideToggle();
+});
+```
+
+Aqui estamos tomando el li de donde nos llamaron, la pantalla de detalles para
+sacar el id de la nominacion
+
+Creamos un objeto usuario con los datos que ya tenemos y se lo mandamos al
+server para que borre el usuario y escondemos los botones
+
+Ya q regrese de la llamada, borramos el usuario de lista si todo salio bien o
+mostramos el error si fue el caso
+
+Ahora vamos a la funcion de votar
+
+```
+$('.aVoteBtn').live('click', function(ev){
+    $.mobile.showPageLoadingMsg();
+    ev.preventDefault();
+    var li = $(this).parents('li');
+    var id = li.attr('id');
+    var details = $('#details');
+    var nid = details.find('#attd').attr('nid');
+    //var name = $('.details').find('legend').text();
+    $.post("/nominations/vote", { id: nid, userid: id },
+        function(data) {
+            if (data){
+                var votes = li.find('.count');
+                votes.html(data);
+                //updat voted list
+            }else{
+                showMsg('dashboard.error', 'dashboard.error_voting');
+            }
+            $.mobile.hidePageLoadingMsg();
+        }
+    ).error(function() {
+        $.mobile.hidePageLoadingMsg();
+        showMsg('dashboard.error', 'dashboard.error_voting'); 
+    });
+    $('.aVoteBtn').slideToggle();
+    $('.aDeleteBtn').slideToggle();
+});
+```
+
+De la misma forma sacamos los datos del li y de details, posteamos al server la
+informacion y escondemos los botones
+
+Al regresar del server, actualizamos la cuenta de los botones o mostrar 
+cualquier error que haya pasado
+
+Nos falta la funcion para invitar amigos a la aplicacion, para esto vamos a 
+reciclar nuestra pantalla de agregar amigos, primero vamos actualizando el
+template `dashboardm.jade`, agregamos una clase a nuestro boton de invite 
+(tenemos uno en cada pagina principal) para que quede asi
+
+```
+a.doinvite(href="#", data-icon="plus", class="ui-btn-right") Invite
+```
+
+Despues en nuestra pagina con id #addf agregamos este boton al footer
+
+```
+a.invite(href="#", data-role="button", data-theme="b") Invite
+```
+
+Y en nuestro css lo iniciamos escondido
+
+```
+.invite{
+    display: none;
+}
+```
+
+Ok ahora al script, en #adduser click agregamos lo siguiente para asegurarnos
+que el boton este escondido al agregar amigos a una nominacion
+
+```
+$('.invite').hide();
+```
+
+Despues agregamos el listener para el boton de invitar
+
+```
+$('.doinvite').live('click', function(){
+    $.mobile.showPageLoadingMsg();
+    $('.invite').show();
+    $.mobile.changePage( "#addf",
+    {
+        transition: "pop",
+        reverse: false,
+	    changeHash: false
+	});
+});
+```
+
+Mostramos nuestro boton de invitar y mostramos la pantalla de agregar amigos, y
+para finalizar agregamos la funcionalidad del boton para invitar amigos
+
+```
+$('.invite').live('click', function(){
+    $.mobile.showPageLoadingMsg();
+    var users = [];
+    var userp;
+    $('#lof').find(':checked').each(function(){
+        users.push({
+            "_id" : $(this).attr('id'),
+            "name" : $(this).attr('name'),
+            "votes" : 0
+        });
+    });
+    var ul = users.length;
+    if (ul > 0 && ul <= 1){
+        userp = users[0];
+    }else{
+        userp = users;
+    }
+    $.post("/invite", { users: userp },
+        function(data) {
+            if (data){
+                history.back();
+                //showMsg('dashboard.warning', 'dashboard.invited'); 
+            }else{
+                showMsg('dashboard.error', 'dashboard.warning_invited');
+            }
+            $.mobile.hidePageLoadingMsg();
+        }
+    ).error(function() { 
+        $.mobile.hidePageLoadingMsg();
+        showMsg('dashboard.warning', 'dashboard.warning_invited'); 
+    });
+});
+```
+
+Tomamos la lista de usuarios seleccionados y se los mandamos al server para
+invitar a los amigos.
+
+Listo ya tenemos suficiente funcionalidad :)
+
+En el proximo y ultimo post veremos borrarme, refrescar paginas, actualizacion
+de strings, checar por session activa y actualizar las rutas y listo nuestra
+version beta para movil
+
+Ayudame con bugs que encuentres, tengo algunos en github o mete mas features
+
+Fork the code
+
+[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-mexico/nomi-nation)
+
+Saludos
