@@ -1,0 +1,134 @@
+{
+    "title" : "Nomination mobile - parte 5",
+    "date" : "04/04/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Este post es parte de una serie sobre como crear una aplicacion con node.js y
+express para facebook en su version movil
+
+[Parte 1](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-1/)
+[Parte 2](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-2/)
+[Parte 3](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-3/)
+[Parte 4](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-4/)
+
+Ve como se creo la version de escritorio que consta de 10 partes
+
+[Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+
+Ultimo post, vamonos de lleno
+
+Primero la parte de borrarme, para aquellos que no les gusto salir en una
+nominacion, si se borran no se pueden volver agregar a esa nominacion, para esto
+actualizamos `mscript.js` y agregamos esta funcionalidad
+
+```
+$('#remove').click(function(ev){
+    $.mobile.showPageLoadingMsg();
+    ev.preventDefault();
+    var uid = $(this).attr('uid');
+    var details = $('#details');
+    var nid = details.find('#attd').attr('nid');
+    $.post("/nominations/eraseuser", { id: nid, user: 'eraseme' },
+        function(data) {
+            if (data){                    
+                //get the row of the user and erase it
+                $('.users').find('#'+uid).remove();
+                var usersl = details.find('.users');
+                usersl.listview('refresh');
+            }else{
+                showMsg('dashboard.error', 'dashboard.error_removing');
+            }
+            $.mobile.hidePageLoadingMsg();
+        }
+    ).error(function() { 
+        $.mobile.hidePageLoadingMsg(); 
+        showMsg('dashboard.error', 'dashboard.error_removing'); 
+    }); 
+});
+```
+
+y tambien actualizamos la pagina para guardar el id en el boton:
+
+```
+a#remove(href="#", data-icon="minus", uid="#{user.id}") #{t('dashboard.remove_me')}
+```
+
+Sencillo tomamos el id del usuario que guardamos previamente en el boton de
+borrar, nos traemos la pagina de detalles y buscamos el id de la nominacion
+le mandamos los datos al servidor y si no hay errores borramos esa fila
+
+OK, ahora para actualizar, vamos a hacer lo siguiente, agregamos la clase
+`refresh` a todos los botones de refresh
+
+```
+a.refresh(href="#", data-role="button", data-theme="b", data-icon="refresh") #{t('dashboard.refresh')}
+```
+
+y agregamos la funcionalidad al boton
+
+```
+//refresh the list of nominations
+$('.refresh').click(function (ev) {
+    $.mobile.showPageLoadingMsg();
+    ev.preventDefault();
+    //get the actual page id
+    var pageid = $.mobile.activePage.attr('id').split('-')[1];
+    //erase the actual list
+    var divider = $('#'+pageid).find('li')[0];
+    $('#'+pageid).find('li').remove();
+    $('#'+pageid).listview('refresh');
+    //add the divider
+    $('#'+pageid).append(divider);
+    //reload the nominations
+    loadNominations(pageid);
+});
+```
+
+Tomamos el id de la pagina actual, le sacamos el tipo de nominaciones que estan
+viendo, sacamos el divider, borramos la lista actual, agregamos el divider
+de nuevo y recargamos las nominaciones
+
+Ahora vamos a actualizar nuestras ruta, vamos a actualizar la de dashboard, asi
+para cuando llegue con un movil los redirigimos a la version movil y ademas
+si alguien quiere probar la version movil o usarla sin estar en un dispositivo
+movil lo puede hacer cambiando la url,el cambio es bastante sencillo en la ruta
+dashboard de nuestra archivo `routes/dashboard.js`
+
+```
+bt = new bowser(req);
+if (bt.isMobile() || bt.isTablet()){
+    res.redirect('/dashboardm');
+}else{
+    res.render('dashboard', 
+        { 
+            user: req.session.user, 
+            error : req.param('error'), 
+            type: 'dashboard', 
+            invited: invited                
+        });
+}
+```
+
+Aqui solo revisamos que esten en una plataforma movil, si asi es los enviamos a
+la version mobil
+
+Solo falta actualizar los strings que tengamos en las plantillas o en el js a 
+strings localizables, eso ya se queda de tarea para uds, cualquier duda pasenla
+como comentario
+
+Esto es todo para la version movil, tenemos una version funcional muy 
+interesante, ahora falta anunciarla por todos lados, ayudenme con bugs o cosas
+nuevas para la aplicacion
+
+Para el proximo post intentare hacer algun job para que corra diariamente y
+cierre las nominaciones que ya estan pasadas y avise a los q pueda en facebook
+
+Despues de eso nos iremos con algo de phonegap para hacerla nativa para
+diferentes plataformas
+
+Fork the code
+
+[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-mexico/nomi-nation)
+
+Saludos

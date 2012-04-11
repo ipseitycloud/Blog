@@ -1,6 +1,6 @@
 {
     "title" : "Nomination mobile - parte 4",
-    "date" : "03/23/2012",
+    "date" : "03/28/2012",
     "author" : "Mrpix, pinguxx"
 }
 
@@ -10,6 +10,7 @@ express para facebook en su version movil
 [Parte 1](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-1/)
 [Parte 2](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-2/)
 [Parte 3](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-3/)
+[Parte 5](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-5/)
 
 Ve como se creo la version de escritorio que consta de 10 partes
 

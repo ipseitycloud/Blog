@@ -27,6 +27,10 @@ express para facebook
 
 [Parte 10](http://blog.ipseitycloud.com/2012/01/Nodejs-parte-10---ultimos-toques/)
 
+Version mobile
+
+[Parte 1](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-1/)
+
 Empezare a publicar algunas cosas sobre el desarrollo con node.js, mientras
 iremos desarrollando una aplicacion que sera publica, asi que podran ayudarme,
 regañarme, guiarme, sus aportaciones son valiosas

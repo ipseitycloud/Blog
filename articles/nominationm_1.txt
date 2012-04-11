@@ -7,6 +7,11 @@
 Este post es parte de una serie sobre como crear una aplicacion con node.js y
 express para facebook en su version movil
 
+[Parte 2](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-2/)
+[Parte 3](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-3/)
+[Parte 4](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-4/)
+[Parte 5](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-5/)
+
 Ve como se creo la version de escritorio que consta de 10 partes
 
 [Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
