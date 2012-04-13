@@ -1,0 +1,154 @@
+{
+    "title" : "Nomination - recurrent service",
+    "date" : "04/13/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Para esta ocasion vamos a crear un servicio que corra diariamente a cierta
+hora para que termine las nominaciones que ya pasaron, para esto necesitamos
+instalar un nuevo modulo que nos ayuda a agendar tareas en nuestra app, vamos
+actualizando nuestro package.json
+
+```
+, "node-schedule" : "0.1.5"
+```
+
+y corremos nuestro comando `npm install -d` para que se instale la nueva 
+dependencia
+
+Antes que nada hay que actualizar nuestro contoller para hacer busquedas de las
+nominaciones mas viejas que la fecha actual, para esto agregamos la siguiente
+funcion al controller nominator
+
+```
+/**
+ * find old nominations
+ * @callback function
+ * 
+*/
+NOMINATOR.findOldNomination = function(callback) {
+    Nomination.find({"endDate": {"$lt": new Date()}}, callback);
+};
+```
+
+Estamos buscando las nominaciones con fecha final mas baja que la fecha actual
+y regresamos los datos en el callback.
+
+Bien ahora en nuestro archivo `server.js` vamos a agregar las siguientes
+variables
+
+```
+schedule = require('node-schedule'),
+fb = require('facebook-js'),
+url = 'http://nomination.cloudno.de/',
+nominator = require('./controllers/nominator.js');
+```
+
+la primera es nuestro nuevo modulo, despues cargamos el modulo de facebook, la
+url de nomination para los mensajes en facebook y nuestro nominator que es
+nuestro controller para los datos.
+
+Iniciamos nuestro scheduler
+
+```
+//add process to kill old nomination
+var rule = new schedule.RecurrenceRule();
+rule.dayOfWeek = [0, new schedule.Range(1, 6)];
+rule.hour = 1;
+rule.minute = 1;
+```
+
+Con esto le estamos diciendo que corra diariamente a la 1 con 0 minutos, y luego
+le decimos que funcion queremos que corra
+
+```
+schedule.scheduleJob(rule, function(){
+    nominator.findOldNomination(function(err, doc){        
+        for (var i=0; i<doc.length;i++){
+            endNomination(doc._id, doc);
+        }
+    });
+});
+```
+
+Aqui estamos buscando todas las nominaciones viejas y las que encuentre vamos a
+ir terminandolas con la funcion endNomination que es asi:
+
+```
+function endNomination(id, doc){
+    if (doc.ownerdata){
+        var users = doc.users;
+        var usersl = doc.users.length;
+        var voters = doc.voters;
+        var votersl = doc.voters.length;
+        if (usersl > 0){
+            var winner = users[0];
+            for (var j=1; j<usersl;j++){
+                if (winner.votes < users[j].votes){
+                    winner = users[j];
+                }
+            }
+            var onerror = function (error) {
+                            if (error) { log.debug('error posting on voted user'); return; }
+                        };
+            fb.apiCall(
+                'POST',
+                '/'+doc.owner+'/feed',
+                {
+                    access_token: doc.ownerdata,
+                    message: app._locals.t('dashboard.won', { wname: winner.name, nname: doc.name }),
+                    name: app._locals.t('dashboard.create'),
+                    link: url
+                },
+                onerror
+            );
+            for (var i=0;i<usersl;i++){
+                if (users[i]._id == doc.owner){ continue; }
+                fb.apiCall(
+                    'POST',
+                    '/'+users[i]._id+'/feed',
+                    {
+                        access_token: doc.ownerdata,
+                        message: app._locals.t('dashboard.won', { wname: winner.name, nname: doc.name }),
+                        name: app._locals.t('dashboard.create'),
+                        link: url
+                    },
+                    onerror
+                );
+            }
+            for (i=0;i<votersl;i++){
+                if (voters[i]._id == doc.owner){ continue; }
+                fb.apiCall(
+                    'POST',
+                    '/'+voters[i]._id+'/feed',
+                    {
+                        access_token: doc.ownerdata,
+                        message: app._locals.t('dashboard.won', { wname: winner.name, nname: doc.name }),
+                        name: app._locals.t('dashboard.create'),
+                        link: url
+                    },
+                    onerror
+                );
+            }
+        }
+    }
+    nominator.eraseNomination(id, function(err){
+        if (err) { log.debug('error erasing nomination'); return; }
+        log.notice('nomination '+ id +' erased by: cron ' );
+    });
+}
+```
+
+Aqui decidimos el ganador, y hacemos llamadas a la api de facebook para 
+notificar a los usuarios involucrados, puede que no llegue bien la llamada por
+que el que creo la nominacion no tiene forma de escribir en el muro de las
+otras personas pero bueno eso ya es parte de la seguridad de facebook
+
+Esto es todo, pueden revisar mas opciones para agendar las tareas en la pagina
+[github del modulo](https://github.com/mattpat/node-schedule)
+
+Fork the code
+
+[https://github.com/nodejs-mexico/nomi-nation](https://github.com/nodejs-mexico/nomi-nation)
+
+Saludos
