@@ -4,6 +4,15 @@
     "author" : "Mrpix, pinguxx"
 }
 
+Ver como se creo la aplicacion:
+
+[Parte 1](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/)
+
+y en su version movil
+
+[Parte 1](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-1/)
+
+
 Para esta ocasion vamos a crear un servicio que corra diariamente a cierta
 hora para que termine las nominaciones que ya pasaron, para esto necesitamos
 instalar un nuevo modulo que nos ayuda a agendar tareas en nuestra app, vamos
