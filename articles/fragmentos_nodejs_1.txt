@@ -16,7 +16,7 @@ El siempre obligado primero programa
 ## Cargar modulos
 
 Aqui podemos ver, cosas importantes como por ejemplo, como cargar los modulos
-con require, para entender mas sobre require vean este (post)[http://jherdman.github.com/2010-04-05/understanding-nodejs-require.html]
+con require, para entender mas sobre require vean este [post](http://jherdman.github.com/2010-04-05/understanding-nodejs-require.html)
 (ingles), ademas de que lean la [documentacion](http://nodejs-es.github.com/api/modules.html#todos_juntos...)
 
 Tambien se le pueden pasar parametros al cargar los modulos por ejemplo
@@ -31,7 +31,7 @@ En este caso estamos pasandole un par de variables al modulo index
 
 Tambien esta la parte de console.log para imprimir informacion en consola, nos
 sirve mucho para debuguear o dar informacion, para mas informacion del uso de la
-consola revisen la (documentacion)[http://nodejs.org/api/stdio.html], hay 
+consola revisen la [documentacion](http://nodejs.org/api/stdio.html), hay 
 diferentes niveles para mostrar la informacion ademas de [modulos que extienden](https://github.com/joyent/node/wiki/modules#wiki-debugging),
 colorean entre otras cosas el output de la consola
 
