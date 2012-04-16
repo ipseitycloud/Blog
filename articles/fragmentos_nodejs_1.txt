@@ -1,0 +1,225 @@
+{
+    "title" : "Fragmentos - nodejs - parte 1",
+    "date" : "04/16/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Estos seran una serie de fragmentos de codigo comun de node.js, codigo que se 
+uso para [nomination](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/) 
+o en otras partes, solo para tener como referencia cosas importantes que podemos 
+volver a usar despues
+
+El siempre obligado primero programa
+
+<script src="https://gist.github.com/1439687.js"> </script>
+
+## Cargar modulos
+
+Aqui podemos ver, cosas importantes como por ejemplo, como cargar los modulos
+con require, para entender mas sobre require vean este (post)[http://jherdman.github.com/2010-04-05/understanding-nodejs-require.html]
+(ingles), ademas de que lean la [documentacion](http://nodejs-es.github.com/api/modules.html#todos_juntos...)
+
+Tambien se le pueden pasar parametros al cargar los modulos por ejemplo
+
+```
+require('./routes/index')(app, log);
+```
+
+En este caso estamos pasandole un par de variables al modulo index
+
+## Consola
+
+Tambien esta la parte de console.log para imprimir informacion en consola, nos
+sirve mucho para debuguear o dar informacion, para mas informacion del uso de la
+consola revisen la (documentacion)[http://nodejs.org/api/stdio.html], hay 
+diferentes niveles para mostrar la informacion ademas de [modulos que extienden](https://github.com/joyent/node/wiki/modules#wiki-debugging),
+colorean entre otras cosas el output de la consola
+
+## Crear un server
+
+Ademas de poder crear un server con el modulo de http y decirle el puerto y la 
+ip a escuchar, tambien podemos crear o iniciar servicores con mucho modulos
+uno de los mas comunes es express, para crearlo con express es sencillo
+
+```
+var app = module.exports = express.createServer();
+```
+
+y luego le decimos en cual puerto escuchar
+
+```
+app.listen(3000);
+```
+
+Tambien se le puede pasar la ip, por default toma la '0.0.0.0' q es de donde sea
+
+Hay muchos otros modulos para crear servidores, date una vuelta por github o 
+npm search para que encuentres el que mas te guste, aunq la mayoria segun el 
+mismo patron
+
+## crear y leer archivos
+
+Para esto se usa el modulo "fs" o filesystem, este modulo tiene todo lo 
+necesario para leer, escribir, etc en archivos, links y directorios
+
+FS tiene la opcion de leer archivos de maner syncrona o asyncrona, como buena
+practica siempre es mejor leerlos asyncronamente
+
+Leer
+
+```
+fs.readFile('data.txt', function (err, data) {
+  if (err)
+    throw err;
+  if (data)
+    console.log(data.toString('utf8'));
+});
+
+fs.readdir('.', function (err, files) {
+ if (err)
+    throw err;
+ for (var index in files) {
+    console.log(files[index]);
+ }
+ });
+```
+
+Escribir
+
+```
+fs.writeFile('data.txt', 'Hello, World!', function (err) {
+     if (err)
+       throw err;
+});
+```
+
+Ver atributos
+
+```
+fs.stat('data.txt', function (err, stats) {
+  if (err)
+     throw err;
+  if (stats.isFile()) {
+      console.log('It\'s a file!');
+  }
+  if (stats.isDirectory()) {
+    console.log('It\'s a directory!');
+  }
+}
+```
+
+Para mas opciones, revisen la [documentacion de fs](http://nodejs.org/api/fs.html)
+
+Tambien puede hacer uso de [async.js](https://github.com/fjakobs/async.js) para 
+hacer mas facil la manipulacion asyncrona de los archivos
+
+## logging
+
+Para el caso que tengas que quieras loguear informacion en un archivo para
+futuras referencias, puedes hacer uso de algunos de los muchos modulos, en el
+caso de nomination usamos log.js que es bastante sencillo de usar
+
+```
+Log = require('log'),
+log = new Log(),
+fs = require('fs');
+```
+
+Para log, tenemos que cargar el modulo y crear un objeto que es el que vamos
+a usar para loguear, ademas tenemos que cargar fs, porq necesitamos crear el
+archivo donde log va a escribir
+
+```
+log.level = Log.DEBUG;
+log.stream = fs.createWriteStream('logs/dev.log', { flags: 'w' });
+log.notice('logging today:' + new Date());
+```
+
+Despues le decimos que nivel de logs queremos en el archivo, esto se puede 
+cambiar dependiendo de la configuracion que vayamos a usar para tener mas o menos
+logs dependiendo si estamos en dev o prod
+
+Creamos el archivo y se lo adjuntamos como stream y solo nos queda empezar a
+loggear con los diferentes niveles
+
+Revisen la documentacion de [log.js](https://github.com/visionmedia/log.js) ademas
+de que hay muchos otros modulos para hacer logueo, hay desde cosas manuales como
+este o unos helpers o middleware para express/connect entre otras cosas, [ver mas
+modulos](https://github.com/joyent/node/wiki/modules#wiki-debugging)
+
+## callbacks
+
+Dada la naturaleza de los programas que vamos a terminar construyendo con node.js
+se hace mucho el uso de callbacks, los callbacks no es nada menos que a donde
+va a regresar una funcion una vez que termine, la convencion es siempre regresar
+como primer parametro el error, exista o no y despues los datos que queramos
+
+por ejemplo
+
+```
+function hello (user, callback) {
+    if (!user){
+        callback(new Error('no user :('));
+        return;
+    }
+    var msg = 'hello' + user;
+    callback(null, msg);
+}
+```
+
+Y de donde la llamamos
+
+```
+hello('newuser', function (error, msg) {
+    if (error) { console.log(error.msg); return; }
+    console.log(msg);
+});
+```
+
+De esta forma siempre sabes si existe un error o no y es mas facil controlar tu
+codigo 
+
+## Errores
+
+Se recomienda user el "new Error()" para marcar tus errores en lugar de solo una
+cadena de string, porque el new Error trae informacion sobre el error, donde
+se produjo, etc muy necesaria para debuguear y darnos una mejor idea de que
+esta pasando, si solo regresamos el string pues nos perderiamos mucha de esa
+informacion, ver el tema de callbacks anterior para ver como manejar propiamente
+los errores
+
+Puedes leer mas sobre esto en este [post](http://stackoverflow.com/questions/7310521/node-js-best-practice-exception-handling)
+(ingles)
+
+Tambien es recomendable usar un error listener, para atrapar aun mas errores
+que se nos escapen como describen [aqui](http://benno.id.au/blog/2011/08/08/nodejs-exceptions)
+
+```
+var events = require('events')
+emitter = new events.EventEmitter()
+
+function y(arg, callback) {
+    if (arg === 1) {
+    x()
+	callback()
+    } else {
+	function onTick() {
+	    try {
+		x()
+	    } catch(err) {
+		emitter.emit('myerror', err)
+		return
+	    }
+	    callback()
+	}
+	process.nextTick(onTick)
+    }
+}
+```
+
+Esto es todo para la primera parte de nuestros fragmentos de node.js
+
+Si buscan alguna forma en especial de hacer algo no duden en preguntar para
+poner informacion al respecto
+
+Saludos
