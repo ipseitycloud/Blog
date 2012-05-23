@@ -1,6 +1,6 @@
 {
     "title" : "Como deployar app de node.js a cloudno.de",
-    "date" : "05/22/2012",
+    "date" : "05/23/2012",
     "author" : "Mrpix, pinguxx"
 }
 
