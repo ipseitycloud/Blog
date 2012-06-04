@@ -1,7 +1,7 @@
 {
-    "title" : "Como deployar app de node.js a cloudno.de",
-    "date" : "05/23/2012",
-    "author" : "Mrpix, pinguxx"
+    "title" : "deploy de una app node.js a cloudno.de",
+	"date" : "05/23/2012",
+	"author" : "Mrpix, pinguxx"
 }
 
 En esta ocasion vamos a ver como hacer el deploy de tu aplicacion node.js a
