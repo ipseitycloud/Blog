@@ -1,0 +1,219 @@
+{
+    "title" : "Nomination en phonegap (cordova) para android - parte 1",
+    "date" : "06/04/2012",
+    "author" : "Mrpix, pinguxx"
+}
+
+Ahora que tenemos nuestra aplicacion funcionando con node.js y jquery mobile
+vamos a pasarla a su version "nativa" con phonegap/apache cordova
+
+Si quieren ver como se hizo la app pueden ver la parte mobil aqui
+
+[Parte 1](http://blog.ipseitycloud.com/2012/02/Nomination-mobile---parte-1/)
+
+Bueno en este post nos dedicaremos a tener todo listo, para empezar ya deben de
+tener su eclipse ide listo con el sdk de android, bajen eclipse de [aqui](http://www.eclipse.org/downloads/)
+e installen el sdk de android de [aca](http://developer.android.com/sdk/index.html)
+ya que lo instalen, configurenlo y agreguen almenos un emulador, cualquier duda
+configurando esto no duden en preguntar
+
+Tambien tenemos que bajar [phonegap](http://phonegap.com/download)
+que es un zip con configuracion para varias plataformas, en nuestro caso nos
+interesa la de android
+
+Ya con todo esto, abrimos nuestro eclipse y creamos un proyecto nuevo de android
+la version 4.0.3 del sdk, nombre que gusten, le ponen nombre a su paquete y
+listo, aceptan para que genere el proyecto, ahora vamos a ir agregando todo lo
+de phonegap
+
+En el root del proyecto, creamos 2 directorios:
+/libs
+/assets/www
+
+copiamos cordova-1.7.0.js del zip que descargamos a /assets/www, luego cordova-1.7.0.jar
+a /libs y al final copia el folder xml del zip de phonegap al folder /res, todo
+el folder
+
+Ahora tenemos que agregar el jar a nuestro build path del proyecto, click derecho
+en el project, build paths -> configure build path... y en el tab de libraries
+agregamos cordova-1.7.0.jar
+
+Hay que actualizar nuestro archivo java donde esta el main con lo siguiente
+* Agregar import org.apache.cordova.*;
+* Cambiar a q la clase extienda de actividad a DroidGap
+* Remplazar el setContentView() con super.loadUrl("file:///android_asset/www/index.html");
+
+el codigo de java debe de quedar algo asi:
+
+```
+package com.ipcloud.nomination;
+
+import org.apache.cordova.DroidGap;
+import android.os.Bundle;
+
+public class NominationActivity extends DroidGap {
+    /** Called when the activity is first created. */
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        super.loadUrl("file:///android_asset/www/index.html");
+    }
+}
+```
+
+Ahora tenemos que agregar los permisos necesarios a nuestra app, para esto
+abrimos el archivo AndroidManifest.xml con el editor xml y agregamos los permisos
+entre los tags <uses-sdk.../> y <application.../>.
+
+```
+<supports-screens 
+    android:largeScreens="true" 
+    android:normalScreens="true" 
+    android:smallScreens="true" 
+    android:resizeable="true" 
+    android:anyDensity="true" />
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.VIBRATE" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.RECEIVE_SMS" />
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+<uses-permission android:name="android.permission.READ_CONTACTS" />
+<uses-permission android:name="android.permission.WRITE_CONTACTS" />
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> 
+<uses-permission android:name="android.permission.GET_ACCOUNTS" />
+<uses-permission android:name="android.permission.BROADCAST_STICKY" />
+```
+
+Y tambien agregamos que orientacion soportamos dentro del tag de <activity>.
+
+```
+android:configChanges="orientation|keyboardHidden"
+```
+
+El xml debe de quedar algo asi:
+
+```
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.ipcloud.nomination"
+    android:versionCode="1"
+    android:versionName="1.0" >
+    
+    <supports-screens
+android:largeScreens="true"
+android:normalScreens="true"
+android:smallScreens="true"
+android:resizeable="true"
+android:anyDensity="true"
+/>
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.VIBRATE" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.RECEIVE_SMS" />
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+<uses-permission android:name="android.permission.READ_CONTACTS" />
+<uses-permission android:name="android.permission.WRITE_CONTACTS" />
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+<uses-permission android:name="android.permission.BROADCAST_STICKY" />
+
+    <uses-sdk android:minSdkVersion="15" />
+
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name" >
+        <activity
+            android:label="@string/app_name"
+            android:name=".NominationActivity"
+            android:configChanges="orientation|keyboardHidden" >
+            <intent-filter >
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="org.apache.cordova.DroidGap" android:label="@string/app_name" android:configChanges="orientation|keyboardHidden"> <intent-filter> </intent-filter> </activity>
+    </application>
+
+</manifest>
+```
+
+Creamos un archivo index.html dentro del folder assets/www que contenga nuestro
+index para moviles:
+
+```
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>Nomination</title>
+<meta name="description" content="Nomination">
+<meta name="author" content="mrpix">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="shortcut icon" href="images/favicon.ico">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<!-- CSS-->
+<link rel="stylesheet" href="stylesheets/jqm.css" type="text/css">
+<link rel="stylesheet" href="stylesheets/index.css" type="text/css">
+<!-- js -->
+<script src="javascripts/lib/jquery-1.7.1.min.js"></script>
+<script src="javascripts/lib/jqm.js"></script>
+<!-- cordova -->
+<script src="cordova-1.7.0.js"></script>
+</head>
+<body>
+    <div data-role="page" data-theme="d">
+		<div data-role="header" data-theme="b">
+			<h1>Nomination</h1>
+		</div>
+		<div data-role="content">
+			<table class="att_table">
+				<thead>
+					<tr>
+						<th>Nominate your friends in facebook</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Have fun</td>
+					</tr>					
+				</tbody>
+			</table>
+			<br />
+			<br />
+			<div style="text-align:center;">
+				<a href="#" onclick="login()"><img src="images/cwf.png" /></a>
+				<br />
+				<br />
+				<br />
+				<img src="images/ipn.png" width="250px"/>
+			</div>
+			<br />
+			<br />
+		</div>
+		<div data-role="footer" data-theme="b">
+			<h4>&copy; Ipseitycloud</h4>
+		</div>
+	</div>
+</body>
+</html>
+```
+
+Y lo corren para verlo en el emulador, deberia de mostrar la pagina de inicio
+de nomination, en posts posteriores agregaremos el plugin de facebook para
+hacer login y mas funcionalidad
+
+
+Saludos

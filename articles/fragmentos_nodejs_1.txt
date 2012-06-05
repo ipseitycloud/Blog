@@ -4,7 +4,6 @@
     "author" : "Mrpix, pinguxx"
 }
 
-{EAV:4aa8cb30ec11840d}
 Estos seran una serie de fragmentos de codigo comun de node.js, codigo que se 
 uso para [nomination](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.js---parte-1/) 
 o en otras partes, solo para tener como referencia cosas importantes que podemos 

@@ -1,0 +1,80 @@
+{
+	"title" : "deploy de una app node.js a cloudno.de",
+	"date" : "05/23/2012",
+	"author" : "Mrpix, pinguxx"
+}
+
+En esta ocasion vamos a ver como hacer el deploy de tu aplicacion node.js a
+cloudno.de, existen otros servicios mas comunes como heroku o nodester, que
+tambien son muy recomendables pero para esta ocasion usaremos este que en lo
+personal me ah servido mucho y su ayuda cada vez que me encuentro algun problema
+siempre es rapida y buena, ademas de que puedes poner bases de datos coudb y 
+redis si asi lo requires, el servicio esta en fase beta y gratuito, muy
+recomendable
+
+Para empezar como con todos los sistemas de este tipo hay que instalar su cli o
+command line interface que no es mas que un script con comandos listos para
+facilitarnos el deployment, actualizacion y demas de nuestra app
+
+```
+npm install cloudnode-cli -g
+```
+
+O sin la g si quieres una instalacion local y no global
+
+Bueno ya con el cli instalado y tu cuenta lista hay que setear el usuario, esto
+solo hay que hacerlo una sola vez
+
+```
+$ cloudnode user setup <username> <password>
+
+cloudnode info verifying credentials...
+```
+
+el usuario es el mismo que en la pagina y el password es el api key que se
+genera en la pagina en la seccion sobre tu cuenta lo encuentras
+
+ahora para ver mas opciones escribe `cloudnode` en la terminal y tendras todos
+los comandos disponibles
+
+Bien, vamos ahora a la pagina y creamos una aplicacion nueva donde nos dara la
+url como subdominio de la app y un repositorio github para subirla
+
+Ya con nuestra app creada en la pagina, hay que generarla localmente para
+codificar, para esto hacemos un app init en mac o linux, si estas en windows
+hay que hacer los pasos manualmente
+
+en mac o linux
+
+```
+$ cloudnode app init <app name>
+cloudnode info initializing git repo for <app name> into folder <app name>
+cloudnode info cloning the repo git clone cloudnode@git.cloudno.de:/git/hs/62-6fc0d44abf9974b91625cc10ff118871.git <app name>
+cloudnode info clone complete
+```
+
+en windows
+
+1 Crear un subdirectorio local para la app
+2 Inicializar en repositorio local (git init)
+3 Clonar el repositorio remoto (git clone ...)
+4 Crear un archivo de ejemplo server.js con un hola mundo
+5 Agregar el server.js al repositorio (git add .)
+6 Hacer commit (git commit -am "commit inicial")
+7 Enviar los cambios a cloudno.de (git push origin master)
+
+Que es lo mismo que haces en la mac o linux pero automatizado, esto lo que hace
+es clonar el repositorio a tu maquina para poder codificar en el y crea una app
+de entrada, o bien si estas en algun ide, solo es cuestion de clonar y empezar a
+hacer commits
+
+Cada que haces un commit, el sistema de cloudnode reinicia la applicacion para
+que veas los nuevos cambios, no importa que puerto pongas en la applicacion
+cloudnode lo va a sobreescribir para usarlo en el subdominio
+
+y listo!!, puedes ver tu app corriendo en cloudnode con la url <app name>.cloudno.de
+
+Puedes en la pagina de administracion de applicaciones ver el log, pararla o
+reiniciarla
+
+Saludos
