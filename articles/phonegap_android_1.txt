@@ -4,7 +4,7 @@
     "author" : "Mrpix, pinguxx"
 }
 
-Ahora que tenemos nuestra aplicacion funcionando con node.js y jquery mobile
+Ahora que tenemos nuestra aplicacion funcionando con node.js y jquery mobile 
 vamos a pasarla a su version "nativa" con phonegap/apache cordova
 
 Si quieren ver como se hizo la app pueden ver la parte mobil aqui
