@@ -1,0 +1,176 @@
+{
+    "title" : "Callbacks",
+    "date" : "04/02/2013",
+    "author" : "Mrpix, pinguxx"
+}
+
+Callbacks en javascript es algo complicado y mas para los que recien empiezan con el mundo de javascript,
+pero primero lo primero que es un callback?
+
+Callback es la llamada que se hace de regreso cuando un proceso que empezamos anteriormente termina y
+necesitamos que ese proceso llame o haga algo en especifico, la forma mas especifica de hacer esto
+es con una funcion y la funcion regresa algo, por ejemplo
+
+```
+function prenderPc() {
+	//mas procesos
+	if (error) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+function doSomethingWithPc(isOn) {
+	//hacer algo
+}
+
+var prendio = prenderPc();
+doSomethingWithPc(prendio);
+//otras funciones
+```
+
+En este caso, simplemente llamamos la funcion prender pc y esperamos a que la funcion prenderpc termine y
+regrese si la pc prendio correctamente o no, pero que pasa si tenemos una pc bastante lenta o anticuada,
+sentar a esperar sin hacer nada mas seria un poco efectivo
+
+## Progrmacion asyncrona
+La programcion asyncrona se refiere a poder llamar una funcion sin tener que esperar a que termine...
+en javascript es muy comun usar programacion asyncrona, para esto hay que mandar funciones a las
+funciones... hu??, facil in javascript las funciones se comportan un poco diferente a otros lenguajes,
+si necesitas mas info sobre funciones pregunta en los comentarios o bien revisa la documentacion en
+[MDN](https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function), volviendo
+a nuestro ejemplo
+
+````
+function prenderPc(callback) {
+	//mas procesos
+	if (error) {
+		callback(error, false);
+	} else {
+		callback(null, true);
+	}
+}
+
+function doSomethingWithPc(error, isOn) {
+	//hacer algo
+}
+
+prenderPc(doSomethingWithPc);
+//otras funciones
+```
+
+Regularmente uno pasa variables como argumentos a las funciones, lo cual tambien se puede hacer, pero
+en este caso estamos mandando un funcion como argumento a "prenderPC" y al finalizar la funcion se llama de
+regreso a la funcion que mandamos con unos parametros "callback()", en este caso estamos usando un patron
+comun en node.js que es siempre regresar primero el error o null si no paso nada y despues los datos
+que esta funcion va a mandar a su callback
+
+En este caso no necesariamente tenemos que esperar a que prenderpc termine podemos hacer otra cosa
+tomar un poco de agua o algo diferente, cuando prenderpc termina mandara a llamar a la funcion que
+le mandamos siguiendo despues con la funcionalidad
+
+## Callback hell
+Es muy comun verse enredado en varias funciones que necesitan un callback, veamos nuestro ejemplo
+
+```
+function prenderPc(callback) {
+	//mas procesos
+	if (error) {
+		callback(error, false);
+	} else {
+		callback(null, true);
+	}
+}
+prenderPc(function (error, isOn) {
+	if (!isOn) {
+		tomarAgua(function () {
+			//tomando agua
+			hacerOtraCosa(function () {
+				//...
+			});
+		});
+	}
+});
+```
+
+Una forma de no pasar por eso es generar funciones y no mandar una funcion anonima o bien usar "promises"
+
+## Donde los eh visto??!!
+El uso mas comun de callbacks en javascript es para las llamadas ajax o los eventos del dom, en nodejs
+usualmente se usan para cosas que son muy complejas, lentas o usan archivos/red, vamos viendo un ejemplo
+sencillo de callbacks con jquery
+
+```
+$('element').on('click, function(event) {
+	//hacer algo con el elemento(this)/evento(event)
+});
+```
+
+En este caso, estamos ligando la funcion al event clik del elemento "element", esto se podria leer como
+cuando se haga click en "element" corre esta funcion, no necesariamente estas en la pantalla sin hacer nada
+sino que solamente esperas a que el evento se de para correr la funcion
+
+Otro ejemplo muy comun es ajax
+
+```
+$.ajax({
+  type: "POST",
+  url: "some.php",
+  data: { name: "John", location: "Boston" }
+}).done(function( msg ) {
+  alert( "Data Saved: " + msg );
+});
+```
+
+Aunque jquery ya usa promises principalmente, aun asi podemos tomarlo como ejemplo, aqui lo que estamos
+haciendo es cargar alguna pagina, y al terminar de cargar los datos manda a llamar la funcion dentro de
+"done"
+
+Node.js usa callbacks para muchas cosas, por ejemplo al cargar un archivo podemos hacerlo de manera
+asyncrona o asyncrona, si lo hacemos syncrona el thread se detendra hasta que la carga del archivo sea
+completa lo cual no es la mejor forma de hacerlo, pero si lo hacemos de manera asynconra, pueden pasar
+otras cosas en el thread mientras el archivo terminar de cargarse
+
+```
+fs.readFile('data.txt', function (err, data) {
+  if (err)
+    throw err;
+  if (data)
+    console.log(data.toString('utf8'));
+});
+```
+
+La funcion toma el path del archivo y un callback, al terminar de leer el archivo llama al callback
+
+## Que pasa con this
+This en javascript es el contexto en el que se esta corriendo actualmente, en el navegador, this sin
+estar dentro de una funcion en especifico es "window" que seria como el objeto global, pero
+cuando estas dentro de un callback, this puede cambiar, por ejemplo cuando escuchas por un evento
+con jquery, this se convierte en el elemento en el cual estas escuchando el evento
+
+```
+//aqui this es window
+var parentwindow = this;
+$('element').on('click, function(event) {
+	//hacer algo con el elemento(this)/evento(event)
+	//aqui this es el elemento
+	var element = this;
+});
+```
+
+Se puede enviar otro contexto en el callback con apply or call, en nuestro ejemplo inicial, seria
+algo asi
+
+````
+function prenderPc(callback) {
+	//mas procesos
+	if (error) {
+		callback.apply(othercontext, error, false);
+	} else {
+		callback.apply(othercontext, null, true);
+	}
+}
+```
+
+De esta forma el primer parametro sera this en el callback
