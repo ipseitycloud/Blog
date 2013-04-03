@@ -42,7 +42,7 @@ si necesitas mas info sobre funciones pregunta en los comentarios o bien revisa 
 [MDN](https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function), volviendo
 a nuestro ejemplo
 
-````
+```
 function prenderPc(callback) {
 	//mas procesos
 	if (error) {
@@ -162,7 +162,7 @@ $('element').on('click, function(event) {
 Se puede enviar otro contexto en el callback con apply or call, en nuestro ejemplo inicial, seria
 algo asi
 
-````
+```
 function prenderPc(callback) {
 	//mas procesos
 	if (error) {
