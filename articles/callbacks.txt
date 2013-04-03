@@ -34,9 +34,9 @@ En este caso, simplemente llamamos la funcion prender pc y esperamos a que la fu
 regrese si la pc prendio correctamente o no, pero que pasa si tenemos una pc bastante lenta o anticuada,
 sentar a esperar sin hacer nada mas seria un poco efectivo
 
-## Progrmacion asyncrona
-La programcion asyncrona se refiere a poder llamar una funcion sin tener que esperar a que termine...
-en javascript es muy comun usar programacion asyncrona, para esto hay que mandar funciones a las
+## Programacion asincrona
+La programcion asincrona se refiere a poder llamar una funcion sin tener que esperar a que termine...
+en javascript es muy comun usar programacion asincrona, para esto hay que mandar funciones a las
 funciones... hu??, facil in javascript las funciones se comportan un poco diferente a otros lenguajes,
 si necesitas mas info sobre funciones pregunta en los comentarios o bien revisa la documentacion en
 [MDN](https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function), volviendo
@@ -96,7 +96,7 @@ prenderPc(function (error, isOn) {
 
 Una forma de no pasar por eso es generar funciones y no mandar una funcion anonima o bien usar "promises"
 
-## Donde los eh visto??!!
+## Donde los he visto??!!
 El uso mas comun de callbacks en javascript es para las llamadas ajax o los eventos del dom, en nodejs
 usualmente se usan para cosas que son muy complejas, lentas o usan archivos/red, vamos viendo un ejemplo
 sencillo de callbacks con jquery
@@ -128,8 +128,8 @@ haciendo es cargar alguna pagina, y al terminar de cargar los datos manda a llam
 "done"
 
 Node.js usa callbacks para muchas cosas, por ejemplo al cargar un archivo podemos hacerlo de manera
-asyncrona o asyncrona, si lo hacemos syncrona el thread se detendra hasta que la carga del archivo sea
-completa lo cual no es la mejor forma de hacerlo, pero si lo hacemos de manera asynconra, pueden pasar
+asincrona o sincrona, si lo hacemos sincrona el thread se detendra hasta que la carga del archivo sea
+completa lo cual no es la mejor forma de hacerlo, pero si lo hacemos de manera asincrona, pueden pasar
 otras cosas en el thread mientras el archivo terminar de cargarse
 
 ```
