@@ -10,8 +10,8 @@ Callbacks en javascript es algo complicado y mas para los que recien empiezan co
 pero primero lo primero que es un callback?
 
 Callback es la llamada que se hace de regreso cuando un proceso que empezamos anteriormente termina y
-necesitamos que ese proceso llame o haga algo en especifico, la forma mas especifica de hacer esto
-es con una funcion y la funcion regresa algo, por ejemplo
+necesitamos que ese proceso llame o haga algo en especifico. La forma mas comun de hacer esto
+es con una funcion que regresa algo de manera sincrona, por ejemplo
 
 ```
 function prenderPc() {
