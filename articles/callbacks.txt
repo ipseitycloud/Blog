@@ -4,6 +4,8 @@
     "author" : "Mrpix, pinguxx"
 }
 
+[English version](http://mrpixc.blogspot.com/2013/04/callbacks.html)
+
 Callbacks en javascript es algo complicado y mas para los que recien empiezan con el mundo de javascript,
 pero primero lo primero que es un callback?
 
@@ -102,7 +104,7 @@ usualmente se usan para cosas que son muy complejas, lentas o usan archivos/red,
 sencillo de callbacks con jquery
 
 ```
-$('element').on('click, function(event) {
+$('element').on('click', function(event) {
 	//hacer algo con el elemento(this)/evento(event)
 });
 ```
@@ -152,7 +154,7 @@ con jquery, this se convierte en el elemento en el cual estas escuchando el even
 ```
 //aqui this es window
 var parentwindow = this;
-$('element').on('click, function(event) {
+$('element').on('click', function(event) {
 	//hacer algo con el elemento(this)/evento(event)
 	//aqui this es el elemento
 	var element = this;
