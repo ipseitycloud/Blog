@@ -9,7 +9,7 @@ uso para [nomination](http://blog.ipseitycloud.com/2012/01/Desarrollo-con-node.j
 o en otras partes, solo para tener como referencia cosas importantes que podemos 
 volver a usar despues
 
-El siempre obligado primero programa
+El siempre obligado primer programa
 
 <script src="https://gist.github.com/1439687.js"> </script>
 

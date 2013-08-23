@@ -1,0 +1,53 @@
+{
+    "title" : "Terminal en el browser",
+    "date" : "08/23/2013",
+    "author" : "Mrpix, pinguxx"
+}
+
+Una extension en chrome que me llamo mucho la atencion se llama, secure shell
+[Secure Shell](https://chrome.google.com/webstore/detail/secure-shell/pnhechapfaindjhompbnflcldabbghjo)  
+
+![](https://lh4.googleusercontent.com/upAygrsln5jcq2xXt2remoQ7jr7Bo_dtQs_85tqlwEHP5FOZfFD1byZRs58QngCddQzEzQTLUQ=s640-h400-e365-rw)
+
+Es un emulador de terminal y cliente de SSH, con el te puedes conectar a tus
+servidores remotamente desde el servidor, esta aun en beta pero a mi me ah
+funcionado bien.
+
+Puedes cambiar algunas configuraciones desde la consola, yo lo primero que hice
+fue actualizarme los colores para q se vean mas como mi console en linux
+
+Habran las web tools de chrome (ctrl + shift + j) or command en lugar de
+ctrl si tienen mac y pegen este pedazo de js en la terminal
+
+```
+// Disable bold. 
+term_.prefs_.set('enable-bold', false) 
+ 
+// Use this for Solarized Dark 
+term_.prefs_.set('background-color', "#000");
+term_.prefs_.set('foreground-color', "#1AAD53");
+ 
+term_.prefs_.set('color-palette-overrides', [
+  '#0E8FB0', 
+  '#dc322f', 
+  '#859900', 
+  '#b58900', 
+  '#268bd2', 
+  '#D66433', 
+  '#2aa198', 
+  '#eee8d5', 
+  '#0086A8', 
+  '#cb4b16', 
+  '#88AAB5', 
+  '#8CACB8', 
+  '#A9BFC2', 
+  '#6c71c4', 
+  '#93a1a1', 
+  '#fdf6e3'
+]);
+```
+
+Puedes jugar con los codigo de colores, que estan en RGB para ponerlo de la
+manera que mas te guste
+
+![](http://blog.ipseitycloud.com/images/secureShell.JPG)
