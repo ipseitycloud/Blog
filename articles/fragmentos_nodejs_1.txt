@@ -11,7 +11,7 @@ volver a usar despues
 
 El siempre obligado primer programa
 
-<script src="https://gist.github.com/1439687.js"> </script>
+<script src="https://gist.github.com/pinguxx/1439687.js"> </script>
 
 ## Cargar modulos
 
